@@ -13,7 +13,7 @@ of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public
-License along with pplatex; see the file COPYING.
+License along with dvipost; see the file COPYING.
 If not, write to the Free Software Foundation, Inc.,
 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 */
@@ -96,8 +96,8 @@ static int dvipost_version (char **argv, char *oarg)
 	puts(version);
 	puts("There is NO warranty.  Redistribution of this software is");
 	puts("covered by the terms of the GNU General Public License.");
-	puts("For more information about these matters, see the files");
-	puts("named COPYING and the TeX source.");
+	puts("You should have received a copy of the GNU General Public");
+	puts("License along with dvipost; see the file COPYING.");
 	exit(EXIT_SUCCESS);
 	return 0;
 }
