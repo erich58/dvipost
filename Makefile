@@ -58,12 +58,13 @@ test.dvi: test.tex
 	latex test
 	rm -f test.log test.aux
 
-FILTER=	sed -e '1,/1 $$/d' \
+FILTER=	sed -e '1,/1 $$/d' -e '/^[[]/d' \
 	-e 's/[, ]*hh[:=]*[-0-9][0-9]*//g' \
-	-e 's/[, ]*vv[:=]*[-0-9][0-9]*//g'
+	-e 's/[, ]*vv[:=]*[-0-9][0-9]*//g' \
+	-e 's/ ([0-9]*x[0-9]* pixels)//g' \
 
-test.log: test.dvi
-	dvitype test.dvi | $(FILTER) > $@
+test.log: test.dvi filter.sed
+	dvitype test.dvi | sed -f filter.sed > $@
 
 purge::; rm -f test.log
 
