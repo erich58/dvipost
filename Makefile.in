@@ -140,11 +140,11 @@ clean::; rm -f tags
 export:: dvipost-0.9.tar.gz
 
 dvipost-0.9.tar.gz:
-	cvs export -r HEAD -d $(@:.tar.gz=) ltxpost
+	cvs export -r V0_9 -d $(@:.tar.gz=) ltxpost
 	sed -e '/local stuff/,$$d' $(@:.tar.gz=)/Makefile.in > .tmp
 	mv .tmp $(@:.tar.gz=)/Makefile.in
 	tar cvzf $@ $(@:.tar.gz=)
-	#rm -rf $(@:.tar.gz=)
+	rm -rf $(@:.tar.gz=)
 
 purge::
 	rm -f *.tar.gz
