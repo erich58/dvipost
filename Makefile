@@ -1,6 +1,6 @@
 CFLAGS=	-g -Wall -Wmissing-prototypes -D_XOPEN_SOURCE
 
-all:: ltxpost tags
+all:: ltxpost tags test
 
 #	basic functions
 
@@ -50,3 +50,13 @@ tags: $(SRC)
 
 clean::; rm -f ctags
 
+#	run test
+
+test:: test.1 test.2
+
+test.dvi: test.tex
+	latex test
+	rm -f test.log test.aux
+
+test.1: test.dvi; dvitype test.dvi > test.1
+test.2: test.dvi; ltxpost test.dvi 2> test.2
