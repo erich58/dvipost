@@ -52,6 +52,8 @@ void dout_extension (DviFile *df, DviExtension *buf)
 {
 	if	(!buf)	return;
 
+	dout_byte(df, buf->type);
+
 	switch (buf->type)
 	{
 	case DVI_XXX1:	dout_unsigned(df, buf->len, 1); break;
