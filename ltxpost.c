@@ -5,6 +5,7 @@
 
 
 #include "dvipost.h"
+#include "dvi.h"
 #include <unistd.h>
 #include <getopt.h>
 
@@ -23,6 +24,7 @@ int main (int argc, char **argv)
 	FILE *input, *output;
 	int opt;
 	int c;
+	int stat;
 
 	while ((opt = getopt(argc, argv, "v")) != -1)
 	{
@@ -86,8 +88,35 @@ int main (int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	while ((c = getc(input)) != EOF)
-		putc(c, output);
+	stat = EXIT_SUCCESS;
+	c = getc(input);
 
-	return EXIT_SUCCESS;
+	switch (c)
+	{
+	case DVI_PRE:
+
+		c = getc(input);
+
+		if	(c == 2)
+		{
+			putc(DVI_PRE, output);
+			putc(c, output);
+
+			while ((c = getc(input)) != EOF)
+				putc(c, output);
+		}
+		else
+		{
+			stat = EXIT_FAILURE;
+		}
+
+		break;
+	default:
+		stat = EXIT_FAILURE;
+		break;
+	}
+
+	fclose(input);
+	fclose(output);
+	return stat;
 }
