@@ -22,18 +22,18 @@ void dout_byte (DviFile *df, int c)
 void dout_unsigned (DviFile *df, int val, unsigned len)
 {
 	if	(--len > 0)
-		dout_signed(df, val / 256, len);
+		dout_unsigned(df, val >> 8, len);
 
-	dout_byte(df, val);
+	dout_byte(df, val & 0xFF);
 }
 
 
 void dout_signed (DviFile *df, int val, unsigned len)
 {
 	if	(--len > 0)
-		dout_signed(df, val / 256, len);
+		dout_signed(df, val >> 8, len);
 
-	dout_byte(df, val);
+	dout_byte(df, val & 0xFF);
 }
 
 
