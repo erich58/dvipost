@@ -21,6 +21,7 @@ If not, write to the Free Software Foundation, Inc.,
 #include "dvipost.h"
 #include "dvi.h"
 #include <ctype.h>
+#include <stdarg.h>
 
 #define	DEBUG		1	/* Allow command debugging */
 

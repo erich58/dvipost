@@ -23,6 +23,7 @@ If not, write to the Free Software Foundation, Inc.,
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define	ERR	0
 #define	NOTE	1
