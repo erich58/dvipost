@@ -268,6 +268,7 @@ int main (int argc, char **argv)
 	int i, n;
 	int status;
 	pid_t pid;
+	time_t stamp;
 
 	tex_argv = xalloc((1 + argc) * sizeof(char*));
 	tex_argv[0] = argv[0];
@@ -353,9 +354,7 @@ int main (int argc, char **argv)
 	tex_argv[tex_argc] = NULL;
 	fflush(stdout);
 
-	if	(!dviname)
-		execvp(tex_argv[0], tex_argv);
-
+	time(&stamp);
 	pid = fork();
 
 	if	(pid == -1)
@@ -368,5 +367,10 @@ int main (int argc, char **argv)
 		execvp(tex_argv[0], tex_argv);
 
 	waitpid(pid, &status, 0);
-	return dvipost(dviname, dviname);
+
+	if	(dviname)
+		return dvipost(dviname, dviname);
+
+	dvipost_search(stamp);
+	return EXIT_SUCCESS;
 }

@@ -22,6 +22,8 @@ If not, write to the Free Software Foundation, Inc.,
 #include "dvipost.h"
 #include "dvi.h"
 #include <unistd.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
 int dvipost (const char *iname, const char *oname)
 {
@@ -129,4 +131,40 @@ int dvipost (const char *iname, const char *oname)
 
 	fclose(output);
 	return stat;
+}
+
+void dvipost_search (time_t stamp)
+{
+	struct dirent *entry;
+	DIR *dir;
+	struct stat filestat;
+
+	dir = opendir(".");
+
+	if	(!dir)
+	{
+		fprintf(stderr, "%s: directory ", pname);
+		perror(".");
+		return;
+	}
+
+	while ((entry = readdir(dir)) != NULL)
+	{
+		char *p = strrchr(entry->d_name, '.');
+
+		if	(p == 0 || strcmp(p, ".dvi") != 0)
+			continue;
+
+		if	(stat(entry->d_name, &filestat) != 0)
+		{
+			fprintf(stderr, "%s: ", pname);
+			perror(entry->d_name);
+			continue;
+		}
+
+		if	(filestat.st_mtime >= stamp)
+			dvipost(entry->d_name, entry->d_name);
+	}
+
+	closedir(dir);
 }

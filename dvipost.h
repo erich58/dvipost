@@ -26,6 +26,7 @@ If not, write to the Free Software Foundation, Inc.,
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define	ERR	0
 #define	NOTE	1
@@ -56,5 +57,6 @@ void pos_add (PosTab *pos, int beg, int end);
 
 extern int process_dvi (const char *id, FILE *in, FILE *out);
 extern int dvipost (const char *iname, const char *oname);
+extern void dvipost_search (time_t stamp);
 
 #endif	/* dvipost.h */
