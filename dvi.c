@@ -11,11 +11,24 @@
 
 #define	RESOLUTION	300.
 
+#define	PAGE_HEAD	0
+#define	PAGE_BODY	1
+#define	PAGE_NOTE	2
+#define	PAGE_FOOT	3
+#define	PAGE_FLOAT	4
+#define	PAGE_NSTAT	5
+
+static int page_num = 0;
+static int page_stat = 0;
+
 static char *magic = "dvipost";
+
+static char *checkname (const char *base, char *name);
 
 DviStat dvi_stat = { NULL, 0, 0, 0, 0, 0, 0 };
 DviUnit dvi_unit = { 0 };
 DviFont *dvi_font = NULL;
+PosTab pos_changed = { NULL, 0, 0 };
 
 /*	status stack
 */
@@ -38,6 +51,9 @@ static void dvi_pop (void)
 */
 
 static double pt_to_dvi = 0.;
+static double in_to_dvi = 0.;
+static double mm_to_dvi = 0.;
+static double cm_to_dvi = 0.;
 
 static void set_unit (DviToken *token)
 {
@@ -49,15 +65,13 @@ static void set_unit (DviToken *token)
 	dvi_unit.conv = dvi_unit.true_conv * (dvi_unit.mag / 1000.);
 
 	pt_to_dvi = (254000. / dvi_unit.num) * (dvi_unit.den / 72.27);
-	message(NOTE, "1pt = %.0f dvi units.\n", pt_to_dvi);
-	/*
 	in_to_dvi = (254000. / dvi_unit.num) * (double) dvi_unit.den;
 	cm_to_dvi = (100000. / dvi_unit.num) * (double) dvi_unit.den;
 	mm_to_dvi = (10000. / dvi_unit.num) * (double) dvi_unit.den;
+	message(NOTE, "1pt = %.0f dvi units.\n", pt_to_dvi);
 	message(NOTE, "1in = %.0f dvi units.\n", in_to_dvi);
 	message(NOTE, "1mm = %.0f dvi units.\n", mm_to_dvi);
 	message(NOTE, "1cm = %.0f dvi units.\n", cm_to_dvi);
-	*/
 }
 
 /*	debugging functions and macros
@@ -161,26 +175,64 @@ typedef struct {
 	void (*eval) (void *par, const char *arg);
 } PostCmd;
 
-static int thickness = 0;
+static int osrule = 0;
 static int cbrule = 0;
-static int cbmode = 0;
+static int cbsep = 0;
+static int cbexp = 0;
+static int floatdepth = 0;
+static int cbmode[PAGE_NSTAT] = { 0 };
+static int cbstat = 0;
+static int osmode[PAGE_NSTAT] = { 0 };
+static int osstat = 0;
 static int textwidth = 0;
 static int textheight = 0;
 static int evensidemargin = 0;
 static int oddsidemargin = 0;
+static int hoffset = 0;
+static int voffset = 0;
 static int topmargin = 0;
 static int headheight = 0;
 static int headsep = 0;
 static int footskip = 0;
-static int showlayout = 0;
+static int marginparsep = 0;
+static int marginparwidth = 0;
+static int layout = 0;
+static int twoside = 0;
 static int cbframe = 0;
 static char *pre = NULL;
 static char *post = NULL;
+static char *osstart = NULL;
+static char *osend = NULL;
+static char *cbstart = NULL;
+static char *cbend = NULL;
 
 static void set_length (void *par, const char *arg)
 {
 	int *length = par;
-	*length = pt_to_dvi * strtod(arg, NULL);
+	double x;
+	char *p;
+
+	x = strtod(arg, &p);
+
+	if	(!p)
+	{
+		*length = 0;
+		return;
+	}
+
+	while (isspace(*p))
+		p++;
+
+	if	(checkname("pt", p))	*length = x * pt_to_dvi;
+	else if	(checkname("mm", p))	*length = x * mm_to_dvi;
+	else if	(checkname("cm", p))	*length = x * cm_to_dvi;
+	else if	(checkname("in", p))	*length = x * in_to_dvi;
+	else			
+	{
+		message(ERR, "$!: unknown unit %s on page %d.\n",
+			p, page_num);
+		*length = 0;
+	}
 }
 
 static void set_string (void *par, const char *arg)
@@ -201,8 +253,36 @@ static void set_depth (void *par, const char *arg)
 {
 	int *depth = par;
 
-	if	(atoi(arg))	(*depth)++;
-	else if	(*depth)	(*depth)--;
+	if	(atoi(arg))		depth[page_stat]++;
+	else if	(depth[page_stat])	depth[page_stat]--;
+}
+
+static int save_stat = 0;
+
+static void set_float (void *par, const char *arg)
+{
+	if	(atoi(arg))
+	{
+		if	(floatdepth == 0)
+		{
+			save_stat = page_stat;
+			page_stat = PAGE_FLOAT;
+		}
+
+		floatdepth++;
+	}
+	else if	(floatdepth)
+	{
+		floatdepth--;
+
+		if	(floatdepth == 0)
+			page_stat = save_stat;
+	}
+}
+
+static void set_page_stat (void *par, const char *arg)
+{
+	page_stat = (int) par;
 }
 
 static PostCmd cmd_tab[] = {
@@ -210,17 +290,33 @@ static PostCmd cmd_tab[] = {
 	{ "textheight", &textheight, set_length },
 	{ "oddsidemargin", &oddsidemargin, set_length },
 	{ "evensidemargin", &evensidemargin, set_length },
+	{ "hoffset", &hoffset, set_length },
+	{ "voffset", &voffset, set_length },
 	{ "topmargin", &topmargin, set_length },
 	{ "headheight", &headheight, set_length },
 	{ "headsep", &headsep, set_length },
 	{ "footskip", &footskip, set_length },
-	{ "showlayout", &showlayout, set_flag },
+	{ "marginparsep", &marginparsep, set_length },
+	{ "marginparwidth", &marginparwidth, set_length },
+	{ "twoside", &twoside, set_flag },
+	{ "layout", &layout, set_length },
 	{ "cbframe", &cbframe, set_flag },
-	{ "thickness", &thickness, set_length },
+	{ "osrule", &osrule, set_length },
 	{ "cbrule", &cbrule, set_length },
-	{ "cbmode", &cbmode, set_depth },
+	{ "cbsep", &cbsep, set_length },
+	{ "cbexp", &cbexp, set_length },
+	{ "cbmode", cbmode, set_depth },
+	{ "osmode", osmode, set_depth },
 	{ "pre", &pre, set_string },
 	{ "post", &post, set_string },
+	{ "osstart", &osstart, set_string },
+	{ "osend", &osend, set_string },
+	{ "cbstart", &cbstart, set_string },
+	{ "cbend", &cbend, set_string },
+	{ "top", (void *) PAGE_BODY, set_page_stat },
+	{ "footnote", (void *) PAGE_NOTE, set_page_stat },
+	{ "bottom", (void *) PAGE_FOOT, set_page_stat },
+	{ "float", NULL, set_float },
 };
 
 #define	cmd_dim	(sizeof(cmd_tab) / sizeof(cmd_tab[0]))
@@ -234,6 +330,8 @@ static char *checkname (const char *base, char *name)
 		if	(base[i] == 0)	break;
 		if	(base[i] != name[i])	return NULL;
 	}
+
+	if	(base[i] != 0)	return NULL;
 
 	name += i;
 
@@ -263,6 +361,9 @@ static int postcmd (char *cmd)
 	cmd = checkname(magic, cmd);
 
 	if	(!cmd)	return 0;
+
+	while (isspace(*cmd))
+		cmd++;
 
 	dbg_end();
 
@@ -299,49 +400,94 @@ static void cmd_move (DviFile *out, int v, int h)
 
 static void endpage (DviFile *out)
 {
-	if	(showlayout)
+	int i;
+	int margin, cbcol;
+
+	cbcol = marginparsep + marginparwidth + cbsep;
+
+	if	(twoside && page_num % 2 == 0)
+	{
+		margin = evensidemargin;
+		cbcol = hoffset + margin - cbcol - cbrule;
+	}
+	else
+	{
+		margin = oddsidemargin;
+		cbcol = hoffset + margin + textwidth + cbcol;
+	}
+	
+	if	(layout)
 	{
 		int footheight;
-		int margin;
+		int x0, y0;
 		int n;
 
-		margin = oddsidemargin;
-		dout_special(out, pre);
-		cmd_goto(out, 0, 0);
-		dout_putrule(out, thickness, margin + textwidth);
-		n = topmargin + headheight + headsep + textheight + footskip;
-		cmd_move(out, n, 0);
-		dout_putrule(out, n, thickness);
+		y0 = voffset;
+		x0 = hoffset;
+		n = 10. * pt_to_dvi;
+		cmd_goto(out, y0 + 0.5 * layout, x0 - n - 0.5 * layout);
+		dout_putrule(out, layout, 2 * n);
+		cmd_goto(out, y0 + n, x0 - 0.5 * layout);
+		dout_putrule(out, 2 * n, layout);
 
-		cmd_goto(out, topmargin, margin);
-		dout_putrule(out, thickness, textwidth);
+		x0 += margin;
+		y0 += topmargin;
+		cmd_goto(out, y0, x0);
+		dout_putrule(out, layout, textwidth);
 		cmd_move(out, headheight, 0);
-		dout_putrule(out, headheight, thickness);
-		dout_setrule(out, thickness, textwidth);
-		dvi_stat.h += textwidth;
-		dout_putrule(out, headheight, thickness);
-		cmd_move(out, headsep, -textwidth);
-		dout_putrule(out, thickness, textwidth);
-		cmd_move(out, textheight, 0);
-		dout_putrule(out, textheight, thickness);
-		dout_setrule(out, thickness, textwidth);
-		dvi_stat.h += textwidth;
-		dout_putrule(out, textheight, thickness);
+		dout_putrule(out, headheight, layout);
+		dout_setrule(out, layout, textwidth - layout);
+		dvi_stat.h += textwidth - layout;
+		dout_putrule(out, headheight, layout);
 
+		y0 += headheight + headsep;
+		cmd_goto(out, y0, x0);
+		dout_putrule(out, layout, textwidth);
+		cmd_move(out, textheight, 0);
+		dout_putrule(out, textheight, layout);
+		dout_setrule(out, layout, textwidth - layout);
+		dvi_stat.h += textwidth - layout;
+		dout_putrule(out, textheight, layout);
+
+		if	(twoside && page_num % 2 == 0)
+			cmd_goto(out, y0, x0 - marginparsep -
+				marginparwidth);
+		else	cmd_goto(out, y0, x0 + textwidth + marginparsep);
+
+		dout_putrule(out, layout, marginparwidth);
+		cmd_move(out, textheight, 0);
+		dout_putrule(out, textheight, layout);
+		dout_setrule(out, layout, marginparwidth - layout);
+		dvi_stat.h += marginparwidth - layout;
+		dout_putrule(out, textheight, layout);
+
+		y0 += textheight + footskip - footheight;
+		cmd_goto(out, y0, x0);
 		footheight = headheight;
 
 		if	(footheight > footskip)
 			footheight = footskip;
 
-		cmd_move(out, footskip - footheight, -textwidth);
-		dout_putrule(out, thickness, textwidth);
+		dout_putrule(out, layout, textwidth);
 		cmd_move(out, footheight, 0);
-		dout_putrule(out, footheight, thickness);
-		dout_setrule(out, thickness, textwidth);
-		dvi_stat.h += textwidth;
-		dout_putrule(out, footheight, thickness);
+		dout_putrule(out, footheight, layout);
+		dout_setrule(out, layout, textwidth - layout);
+		dvi_stat.h += textwidth - layout;
+		dout_putrule(out, footheight, layout);
+	}
 
-		dout_special(out, post);
+	if	(pos_changed.dim)
+	{
+		dout_special(out, cbstart);
+
+		for (i = 0; i < pos_changed.dim; i++)
+		{
+			POS *p = pos_changed.tab + i;
+			cmd_goto(out, p->end, cbcol);
+			dout_putrule(out, p->end - p->beg, cbrule);
+		}
+
+		dout_special(out, cbend);
 	}
 }
 
@@ -353,6 +499,13 @@ static void mv_right(int val)
 	dbg(("h:=%d%+d", dvi_stat.h, val));
 	dvi_stat.h += val;
 	dbg(("=%d ", dvi_stat.h));
+}
+
+static void mv_down(int val)
+{
+	dbg(("v:=%d%+d", dvi_stat.v, val));
+	dvi_stat.v += val;
+	dbg(("=%d ", dvi_stat.v));
 }
 
 static int text_hpos = 0;	/* number of text characters past */
@@ -369,6 +522,19 @@ static void text_beg (DviFile *out)
 	if	(text_cnt)	return;
 
 	text_hpos = dvi_stat.h;
+
+	if	(cbmode[page_stat])
+	{
+		dout_special(out, cbstart);
+		cbstat = 1;
+	}
+
+	if	(osmode[page_stat])
+	{
+		dout_special(out, osstart);
+		osstat = 1;
+	}
+
 	return;
 }
 
@@ -378,14 +544,12 @@ static void text_end (DviFile *out)
 
 	text_cnt = 0;
 
-	if	(cbmode)
+	if	(osmode[page_stat])
 	{
-		dout_special(out, pre);
-
 		if	(cbframe)
 		{
 			dout_down(out, text_depth);
-			dout_putrule(out, text_depth + text_height, thickness);
+			dout_putrule(out, text_depth + text_height, osrule);
 			dout_down(out, -text_depth);
 		}
 
@@ -394,17 +558,26 @@ static void text_end (DviFile *out)
 			double x;
 			
 			l = dvi_stat.h - text_hpos;
-			dbg(("[l=%d] ", l));
 			x = (acc_height - acc_depth) / acc_width;
-			o = 0.5 * (1. - thickness + x);
+			o = 0.5 * (1. - osrule + x);
 
 			dout_down(out, -o);
 			dout_right(out, -l);
-			dout_setrule(out, thickness, l);
+			dout_setrule(out, osrule, l);
 			dout_down(out, o);
 		}
+	}
 
-		dout_special(out, post);
+	if	(osstat)
+	{
+		dout_special(out, osend);
+		osstat = 0;
+	}
+
+	if	(cbstat)
+	{
+		dout_special(out, cbend);
+		cbstat = 0;
 	}
 
 	text_height = 0;
@@ -433,20 +606,21 @@ static void setchar (DviFile *out, int c)
 	mv_right(w);
 	text_cnt++;
 
-	if	(!cbmode)	return;
+	if	(!cbmode[page_stat])	return;
+
+	pos_add(&pos_changed, dvi_stat.v - text_height - cbexp,
+		dvi_stat.v + text_depth + cbexp);
 
 	if	(cbframe)
 	{
-		dout_special(out, pre);
 		dout_right(out, -w);
 		dout_down(out, md);
-		dout_putrule(out, md + mh, thickness);
+		dout_putrule(out, md + mh, osrule);
 		dout_down(out, text_depth - md);
-		dout_putrule(out, thickness, w);
+		dout_putrule(out, osrule, w);
 		dout_down(out, -text_height - text_depth);
-		dout_setrule(out, thickness, w);
+		dout_setrule(out, osrule, w);
 		dout_down(out, text_height);
-		dout_special(out, post);
 	}
 }
 
@@ -515,6 +689,17 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 			dout_token(out, token);
 			mv_right(dvi_stat.w);
 			continue;
+		case DVI_X1:
+		case DVI_X2:
+		case DVI_X3:
+		case DVI_X4:
+			dvi_stat.x = token->par[0];
+			/*FALLTHROUGH*/
+		case DVI_X0:
+			dbg(("%d ", dvi_stat.x));
+			dout_token(out, token);
+			mv_right(dvi_stat.x);
+			continue;
 		default:
 			break;
 		}
@@ -528,24 +713,36 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 				token->par[0], token->par[1]));
 			mv_right(token->par[1]);
 			break;
+		case DVI_PUT_RULE:
+			dbg(("height %d, width %d \n ",
+				token->par[0], token->par[1]));
+			break;
 		case DVI_DOWN1:
 		case DVI_DOWN2:
 		case DVI_DOWN3:
 		case DVI_DOWN4:
-			dbg(("%d v:=%d%+d", token->par[0],
-				dvi_stat.v, token->par[0]));
-			dvi_stat.v += token->par[0];
-			dbg(("=%d ", dvi_stat.v));
+			dbg(("%d ", token->par[0]));
+			mv_down(token->par[0]);
 			break;
-		case DVI_X1:
-		case DVI_X2:
-		case DVI_X3:
-		case DVI_X4:
-			dvi_stat.x = token->par[0];
+		case DVI_Y1:
+		case DVI_Y2:
+		case DVI_Y3:
+		case DVI_Y4:
+			dvi_stat.y = token->par[0];
 			/*FALLTHROUGH*/
-		case DVI_X0:
-			dbg(("%d ", dvi_stat.x));
-			mv_right(dvi_stat.x);
+		case DVI_Y0:
+			dbg(("%d ", dvi_stat.y));
+			mv_down(dvi_stat.y);
+			break;
+		case DVI_Z1:
+		case DVI_Z2:
+		case DVI_Z3:
+		case DVI_Z4:
+			dvi_stat.z = token->par[0];
+			/*FALLTHROUGH*/
+		case DVI_Z0:
+			dbg(("%d ", dvi_stat.z));
+			mv_down(dvi_stat.z);
 			break;
 		case DVI_BOP:
 			dbg(("%d ", token->par[0]));
@@ -557,6 +754,9 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 			dvi_stat.y = 0;
 			dvi_stat.z = 0;
 			dvi_font = NULL;
+			page_num = token->par[0];
+			page_stat = PAGE_HEAD;
+			pos_init(&pos_changed);
 			break;
 		case DVI_EOP:
 			endpage(out);

@@ -5,7 +5,7 @@ all:: ltxpost tags test ps
 #	basic functions
 
 HDR=	ltxpost.h
-BASE=	message.c alloc.c
+BASE=	message.c alloc.c pos.c
 
 $(BASE:.c=.o): $(HDR)
 
@@ -54,14 +54,9 @@ clean::; rm -f tags
 
 test:: test.log ptest.dvi ptest.log
 
-test.dvi: test.tex
+test.dvi: test.tex dvipost.sty
 	latex test
 	rm -f test.log test.aux
-
-FILTER=	sed -e '1,/1 $$/d' -e '/^[[]/d' \
-	-e 's/[, ]*hh[:=]*[-0-9][0-9]*//g' \
-	-e 's/[, ]*vv[:=]*[-0-9][0-9]*//g' \
-	-e 's/ ([0-9]*x[0-9]* pixels)//g' \
 
 test.log: test.dvi filter.sed
 	dvitype test.dvi | sed -f filter.sed > $@

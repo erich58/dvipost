@@ -22,6 +22,20 @@ extern void *xalloc (size_t size);
 extern void xfree (void *data);
 extern char *xcopy (const char *str);
 
+typedef struct {
+	int beg;
+	int end;
+} POS;
+
+typedef struct {
+	POS *tab;
+	size_t dim;
+	size_t size;
+} PosTab;
+
+void pos_init (PosTab *pos);
+void pos_add (PosTab *pos, int beg, int end);
+
 extern int process_dvi (const char *id, FILE *in, FILE *out);
 extern int process_pdf (const char *id, FILE *in, FILE *out);
 

@@ -1,1 +1,10 @@
 The size of an integer is assumed to be at least 4 Bytes long.
+
+The overstrike line is positioned at the mean height
+of every block of text not broken by vertical movements and font
+changes.
+
+The current state of change bar mode and overstrike mode
+must be committed do environments, which are placed on different
+locations than the current text. This is done by redefining
+\color@begingroup and \color@endgroup.

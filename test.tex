@@ -1,68 +1,127 @@
-\documentclass[12pt,a4paper]{article}
+\documentclass[12pt,a4paper,twoside]{article}
+\usepackage{multicol}
 \usepackage[dvips,usenames]{color}
+\usepackage{dvipost}
 
+%	layout parameters
+
+%\hoffset=5mm
+%\voffset=5mm
 \parskip\baselineskip
 
 % dvipost parameters
 
-\special{dvipost: showlayout=1}
+\dvipostlayout	% transfer layout parameters to dvipost
+
+\special{dvipost: layout=0.5pt}
 %\special{dvipost: cbframe=1}
-\special{dvipost: pre color push Blue}
-\special{dvipost: post color pop}
-\special{dvipost: cbrule=10pt}
-\special{dvipost: thickness=1pt}
-%\special{dvipost: thickness=\the\fboxrule}
+\special{dvipost: osstart color push Red}
+\special{dvipost: osend color pop}
+\special{dvipost: cbstart color push Blue}
+\special{dvipost: cbend color pop}
+%\special{dvipost: cbrule=2pt}
+%\special{dvipost: cbsep=12pt}
+\special{dvipost: cbsep=2pt}
+\special{dvipost: cbexp=12pt}
+%\special{dvipost: cbexp=0pt}
+\special{dvipost: osrule=1pt}
+%\special{dvipost: osrule=\the\fboxrule}
 
-% interface macros
+%	some test macos
 
-\def\setlayout{%
-	\special{dvipost: textwidth=\the\textwidth}%
-	\special{dvipost: textheight=\the\textheight}%
-	\special{dvipost: evensidemargin=\the\evensidemargin}%
-	\special{dvipost: oddsidemargin=\the\oddsidemargin}%
-	\special{dvipost: topmargin=\the\topmargin}%
-	\special{dvipost: headheight=\the\headheight}%
-	\special{dvipost: headsep=\the\headsep}%
-	\special{dvipost: footskip=\the\footskip}%
-	\ignorespaces
+\let\cs\changestart
+\let\ce\changeend
+
+\def\stuff{ Here is some stuff inserted.}
+\def\TN{This Text is new.}
+\def\TS{This Text is not marked.}
+\def\TO{This Text is obsolate.}
+
+\def\TAB#1#2{
+  \begin{figure}[#1]
+  \centering
+  \begin{tabular}{|l|r|r|}
+  \hline
+  label & col1 & col2 \\
+  \hline
+  line1 & 1.1 & 1.2 \\
+  line2 & \textchanged{\overstrike{0.0}2.1} & 2.2 \\
+  line3 & 3.1 & 3.2 \\
+  \hline
+  \end{tabular}
+  \caption{#2}
+  \end{figure}
 }
-
-\def\cs{\color{Red}\special{dvipost: cbmode=1}}
-\def\ce{\special{dvipost: cbmode=0}\color{Black}}
-\def\textchanged#1{\cs{}#1\ce{}}
 
 %	test document
 
-\setlayout
-
 \begin{document}
-Output marked as `changed text' is colored red. Generated output
-from {\tt ltxpost} is colored green.
+Output marked as \textchanged{changed} is colored blue.
+\overstrike{Overstriked} text is colored red.
+Overstrike mode and change mode are completely independend.
 
 Here comes the first paragraph.
-\textchanged{This text is marked.}
-This text is not marked.
+\textchanged{\overstrike{\TO\stuff\stuff} \TN\stuff\stuff}
+\TS\stuff\stuff\stuff
 
 Here is the second paragraph with some special markings.
-Here is a total marked formular: \cs{}$\sum_{i=0}^{\infty}x_i$\ce{}.
-This text is not marked.
+Here is a total marked formular:
+$\cs{}\overstrike{\sum_{i=0}^{\infty}x_i}\sum_{i=0}^{\infty}x_i\ce{}$.
+\TS
 Here is a partial marked formular:
-$\sum_{\cs{}i\ce{}j=0}^{\infty}x_{\cs{}i\ce{}j}$.
-This text is not marked.
+$\sum_{\cs{}\overstrike{i}j\ce{}=0}^{\infty}x_{\cs{}\overstrike{i}j\ce{}}$.
+\TS
 
 \noindent
-\begin{minipage}[b]{0.4\textwidth}
+\begin{minipage}[b]{0.45\textwidth}
 Here starts a minipage.
-This text is not marked.
-\textchanged{This text is marked.}
-This text is not marked.
+\TS{}
+\textchanged{\overstrike{\TO} \TN}
+\TS\stuff
 \end{minipage}
 \hfill
-\begin{minipage}[t]{0.4\textwidth}
+\begin{minipage}[t]{0.45\textwidth}
 Here starts a minipage.
-This text is not marked.
-\textchanged{This text is marked.}
-This text is not marked.
+\TS{}
+\textchanged{\overstrike{\TO} \TN}
+\TS\stuff
 \end{minipage}
+
+\TAB{b}{Partially marked float object}
+
+\TS\stuff\stuff\stuff\stuff
+\stuff\stuff\stuff\stuff
+\marginpar{Here is a partial marked marginpar.
+  \textchanged{\overstrike{\TO} \TN} \TS}
+\stuff\stuff\stuff\stuff
+\stuff\stuff\stuff\stuff
+
+Here is a partial marked footnote\footnote{%
+\TS\stuff\stuff\stuff\stuff\stuff
+\textchanged{\TN\stuff\stuff\stuff\stuff\stuff\stuff\stuff}
+\TS\stuff\stuff\stuff\stuff\stuff}.
+\TS{}
+\textchanged{\overstrike{\TO\stuff}\TN\stuff}
+\TS\stuff\stuff\stuff\stuff
+
+\TAB{t}{Partially marked float object}
+\changestart
+\TAB{b}{Total marked float object}
+\changeend
+
+\cs\marginpar{\overstrike{\TO} \TN}\ce
+Here is a total marked marginpar.
+\TS\stuff\stuff\stuff\stuff\stuff
+
+\begin{multicols}{3}%[\subsection*{Start multicol environment}]
+Here\cs\footnote{%
+\TN\stuff\stuff\stuff\stuff}\ce{} is a total marked footnote.
+\TS\stuff\stuff\stuff\stuff\stuff
+\TS\stuff\stuff\stuff\stuff\stuff
+\textchanged{\overstrike{\TO}}
+\footnote{\TS}
+\end{multicols}
+
+\TS\stuff\stuff\stuff
 
 \end{document}

@@ -1,0 +1,100 @@
+% dvipost interface
+% $Copyright (C) 2002 Erich Frühstück
+% A-3423 St.Andrä/Wördern, Südtirolergasse 17-21/5
+
+\special{dvipost: osrule=\the\fboxrule}
+\special{dvipost: cbsep=2pt}
+\special{dvipost: cbrule=2pt}
+\special{dvipost: cbexp=12pt}
+
+% transfer layout parameters to dvipost
+
+\def \dvipostlayout{%
+  \if@twoside\special{dvipost: twoside 1}\else
+    \special{dvipost: twoside 0}\fi
+  \special{dvipost: hoffset=\the\hoffset}%
+  \special{dvipost: voffset=\the\voffset}%
+  \special{dvipost: textwidth=\the\textwidth}%
+  \special{dvipost: textheight=\the\textheight}%
+  \special{dvipost: evensidemargin=\the\evensidemargin}%
+  \special{dvipost: oddsidemargin=\the\oddsidemargin}%
+  \special{dvipost: topmargin=\the\topmargin}%
+  \special{dvipost: headheight=\the\headheight}%
+  \special{dvipost: headsep=\the\headsep}%
+  \special{dvipost: footskip=\the\footskip}%
+  \special{dvipost: marginparsep=\the\marginparsep}
+  \special{dvipost: marginparwidth=\the\marginparwidth}
+}
+
+% macros to set change mode
+
+\newif \ifdvipost@cbmode
+\dvipost@cbmodefalse
+
+\def \changestart{\dvipost@cbmodetrue\special{dvipost: cbmode=1}}
+\def \changeend{\special{dvipost: cbmode=0}\dvipost@cbmodefalse}
+\def \textchanged#1{\changestart #1\changeend}
+
+% macros to set overstrike mode
+
+\newif \ifdvipost@osmode
+\dvipost@osmodefalse
+
+\def \overstrikeon{\dvipost@osmodetrue\special{dvipost: osmode=1}}
+\def \overstrikeoff{\special{dvipost: osmode=0}\dvipost@osmodefalse}
+\def \overstrike#1{\overstrikeon #1\overstrikeoff}
+
+% redefine \color@begingroup and \color@endgroup to
+% transfer state of cbmode and osmode to the interface
+% this macros are used by \footnote etc.
+
+\let \dvipost@begincolor \color@begingroup
+\let \dvipost@endcolor \color@endgroup
+ 
+\def \color@begingroup {
+  \dvipost@begincolor
+  \ifdvipost@cbmode \special{dvipost: cbmode 1}\fi
+  \ifdvipost@osmode \special{dvipost: osmode 1}\fi
+}
+
+\def \color@endgroup {%
+  \ifdvipost@osmode \special{dvipost: osmode 0}\fi
+  \ifdvipost@cbmode \special{dvipost: cbmode 0}\fi
+  \dvipost@endcolor
+}
+
+% redefine \@floatboxreset and \@endfloatbox to
+% mark the contents of floats.
+
+\let \dvipost@floatboxreset \@floatboxreset
+\let \dvipost@endfloatbox \@endfloatbox
+
+\def \@floatboxreset{%
+  \special{dvipost: float 1}
+  \ifdvipost@cbmode \special{dvipost: cbmode 1}\fi
+  \ifdvipost@osmode \special{dvipost: osmode 1}\fi
+  \dvipost@floatboxreset
+ }
+
+\def \@endfloatbox{%
+  \ifdvipost@osmode \special{dvipost: osmode 0}\fi
+  \ifdvipost@cbmode \special{dvipost: cbmode 0}\fi
+  \special{dvipost: float 0}%
+  \dvipost@endfloatbox
+}
+
+%\newenvironment{figure}
+%  {\@float{figure}}
+%  {\end@float}
+
+% redefine \@texttop \@textbottom and \footnoterule to
+% to get part of page.
+
+\let \dvipost@top \@texttop
+\def \@texttop{\special{dvipost: top}\dvipost@top}
+
+\let \dvipost@bottom \@textbottom
+\def \@textbottom{\special{dvipost: bottom}\dvipost@bottom}
+
+\let \dvipost@footnoterule \footnoterule
+\def \footnoterule{\special{dvipost: footnote}\dvipost@footnoterule}
