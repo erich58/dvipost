@@ -69,7 +69,7 @@ static double tfm2pt (int val)
 }
 #endif
 
-int tfm_load (TFM *tfm, const char *name)
+int tfm_load (TFM *tfm, const char *name, int scale)
 {
 	FILE *file;
 	unsigned width[256];
@@ -125,6 +125,10 @@ int tfm_load (TFM *tfm, const char *name)
 		(void) tfm_word(file);
 		tfm->dsize = tfm2dvi(tfm_word(file));
 		tfm_skip(file, 4 * lh - 8);
+
+		if	(tfm->dsize && scale != tfm->dsize)
+			message(STAT, " (this font is magnified %.0f%%) \n",
+				100. * scale / tfm->dsize);
 	}
 	else	tfm_skip(file, 4 * lh);
 

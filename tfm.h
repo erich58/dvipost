@@ -14,6 +14,6 @@ typedef struct {
 } TFM;
 
 extern double tfm_conv;
-extern int tfm_load (TFM *tfm, const char *name);
+extern int tfm_load (TFM *tfm, const char *name, int size);
 
 #endif	/* tfm.h */
