@@ -5,7 +5,7 @@
 
 #include "ltxpost.h"
 
-extern void *xalloc (size_t size)
+void *xalloc (size_t size)
 {
 	void *p;
 	
@@ -22,7 +22,12 @@ extern void *xalloc (size_t size)
 	return p;
 }
 
-extern void xfree (void *p)
+void xfree (void *p)
 {
 	if	(p)	free(p);
+}
+
+char *xcopy (const char *str)
+{
+	return str ? strcpy(xalloc(strlen(str) + 1), str) : NULL;
 }
