@@ -5,14 +5,20 @@
 
 #include "ltxpost.h"
 #include "dvi.h"
+#include <ctype.h>
 
 #define	DEBUG		1	/* Allow command debugging */
 
 #define	RESOLUTION	300.
 
+static char *magic = "ltxpost";
+
 DviStat dvi_stat = { NULL, 0, 0, 0, 0, 0, 0 };
 DviUnit dvi_unit = { 0 };
 DviFont *dvi_font = NULL;
+
+/*	status stack
+*/
 
 static void dvi_push (void)
 {
@@ -28,6 +34,11 @@ static void dvi_pop (void)
 	xfree(ptr);
 }
 
+/*	meassurement units
+*/
+
+static double pt_to_dvi = 0.;
+
 static void set_unit (DviToken *token)
 {
 	dvi_unit.num = token->par[0];
@@ -36,7 +47,21 @@ static void set_unit (DviToken *token)
 	dvi_unit.true_conv = (dvi_unit.num / 254000.0);
 	dvi_unit.true_conv *= (RESOLUTION / dvi_unit.den);
 	dvi_unit.conv = dvi_unit.true_conv * (dvi_unit.mag / 1000.);
+
+	pt_to_dvi = (254000. / dvi_unit.num) * (dvi_unit.den / 72.27);
+	message(NOTE, "1pt = %.0f dvi units.\n", pt_to_dvi);
+	/*
+	in_to_dvi = (254000. / dvi_unit.num) * (double) dvi_unit.den;
+	cm_to_dvi = (100000. / dvi_unit.num) * (double) dvi_unit.den;
+	mm_to_dvi = (10000. / dvi_unit.num) * (double) dvi_unit.den;
+	message(NOTE, "1in = %.0f dvi units.\n", in_to_dvi);
+	message(NOTE, "1mm = %.0f dvi units.\n", mm_to_dvi);
+	message(NOTE, "1cm = %.0f dvi units.\n", cm_to_dvi);
+	*/
 }
+
+/*	debugging functions and macros
+*/
 
 #if	DEBUG
 static int dbg_pos = 0;
@@ -123,12 +148,119 @@ dbg_printf("current font is %s ", font ? font->token.str : "<undef>");
 
 #endif
 
+/*	post filter status
+*/
+
+typedef struct {
+	char *name;
+	void (*eval) (const char *arg);
+} PostCmd;
+
+static int cbrule = 65536.;	/* 1pt */
+static int cbmode = 0;
+static int width = 0;
+static int height = 0;
+
+static int str2length (const char *arg)
+{
+	return pt_to_dvi * strtod(arg, NULL);
+}
+
+static void cmd_cbmode (const char *arg)
+{
+	cbmode = atoi(arg);
+}
+
+static void cmd_cbrule (const char *arg)
+{
+	cbrule = str2length(arg);
+}
+
+static void cmd_width (const char *arg)
+{
+	width = str2length(arg);
+}
+
+static void cmd_height (const char *arg)
+{
+	height = str2length(arg);
+}
+
+static PostCmd cmd_tab[] = {
+	{ "width", cmd_width },
+	{ "height", cmd_height },
+	{ "cbrule", cmd_cbrule },
+	{ "cbmode", cmd_cbmode },
+};
+
+#define	cmd_dim	(sizeof(cmd_tab) / sizeof(cmd_tab[0]))
+
+static char *checkname (const char *base, char *name)
+{
+	int i;
+
+	for (i = 0; name[i] != 0; i++)
+	{
+		if	(base[i] == 0)	break;
+		if	(base[i] != name[i])	return NULL;
+	}
+
+	name += i;
+
+	switch (*name)
+	{
+	case ':':
+	case '=':
+	case ' ':
+		do	name++;
+		while	(*name == '=' || *name == ':' || *name == ' ');
+
+		break;
+	case 0:	
+		break;
+	default:
+		return NULL;
+	}
+
+	return name;
+}
+
+static int postcmd (char *cmd)
+{
+	char *arg;
+	int i;
+
+	cmd = checkname(magic, cmd);
+
+	if	(!cmd)	return 0;
+
+	dbg_end();
+
+	for (i = 0; i < cmd_dim; i++)
+	{
+		if	((arg = checkname(cmd_tab[i].name, cmd)))
+		{
+			cmd_tab[i].eval(arg);
+			return 1;
+		}
+	}
+
+	message(NOTE, "$!: unknown command <%s>\n", cmd);
+	return 1;
+}
+
+/*	functions
+*/
+
 static void mv_right(int val)
 {
 	dbg(("h:=%d%+d", dvi_stat.h, val));
 	dvi_stat.h += val;
 	dbg(("=%d ", dvi_stat.h));
 }
+
+/*	main routine
+*/
 
 int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 {
@@ -225,6 +357,9 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 		case DVI_XXX3:
 		case DVI_XXX4:
 			dbg(("'%s' ", token->str));
+
+			if	(postcmd(token->str))
+				continue;
 			break;
 		case DVI_FNT_DEF1:
 		case DVI_FNT_DEF2:

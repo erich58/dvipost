@@ -1,6 +1,18 @@
 \documentclass[12pt]{article}
+\usepackage[dvips,usenames]{color}
+
+\special{ltxpost: cbrule=10pt}
+
+\def\getlayout{%
+	\expandafter\special{ltxpost: width=\the\textwidth}%
+	\expandafter\special{ltxpost: height=\the\textheight}%
+	\ignorespaces
+}
+
+\def\cs{\color{Red}\special{ltxpost: cbmode=1}}
+\def\ce{\special{ltxpost: cbmode=0}\color{Black}}
 
 \begin{document}
-{\Large\tt This} is a simple test document\rule{1pt}{1pt}
-\special{ltxpost: Post filter command}
+\getlayout
+{\Large\tt This} is a simple \cs{}test\ce{} document\rule{1pt}{1pt}
 \end{document}
