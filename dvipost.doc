@@ -1,6 +1,6 @@
 /*	dvipost manpage
 
-$Copyright (C) 2002 Erich Frühstück
+$Copyright (C) 2002 Erich Fruehstueck
 
 Dvipost is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public
@@ -234,4 +234,4 @@ the command |\dvipost{footnote}| for a correct handling of
 overstrike mode and change bars.
 
 \Copyright
-Copyright \latex[(C)]{\copyright{}} 2002 Erich Frühstück
+Copyright \latex[(C)]{\copyright{}} 2002 Erich Fruehstueck
