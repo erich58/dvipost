@@ -32,8 +32,8 @@ static void dvi_pop (void)
 static void set_unit (DviToken *token)
 {
 	dvi_unit.num = token->par[0];
-	dvi_unit.den = token->par[0];
-	dvi_unit.mag = token->par[0];
+	dvi_unit.den = token->par[1];
+	dvi_unit.mag = token->par[2];
 	dvi_unit.tfm_conv = (25400000.0 / dvi_unit.num);
 	dvi_unit.tfm_conv *= (dvi_unit.den / 473628672.) / 16.0;
 	dvi_unit.true_conv = (dvi_unit.num / 254000.0);
