@@ -106,9 +106,8 @@ static void dbg_type (DviToken *token)
 #define	dbg(args)	dbg_printf args
 
 #define	dbg_level(level)	\
-dbg_printf("\nlevel %d:(h=%d,v=%d,w=%d,x=%d,y=%d,z=%d) ", \
-	level, dvi_stat.h, dvi_stat.v, dvi_stat.w, dvi_stat.x,	\
-	dvi_stat.y, dvi_stat.z, pixel(dvi_stat.h), pixel(dvi_stat.v))
+dbg_printf("\nlevel %d:(h=%d,v=%d,w=%d,x=%d,y=%d,z=%d) ", level, \
+	dvi_stat.h, dvi_stat.v, dvi_stat.w, dvi_stat.x,	dvi_stat.y, dvi_stat.z)
 
 #define	dbg_font(font)	\
 dbg_printf("current font is %s ", font ? font->token.str : "<undef>");
