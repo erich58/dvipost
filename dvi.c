@@ -113,7 +113,7 @@ static int parse_post(DviFile *df, DviFile *out)
 			while (n-- > 0)
 				dout_byte(out, 223);
 
-			return 0;
+			return out->ok ? 0 : 1;
 		default:
 			df_fatal(df, "Command %d not allowed in postamble.",
 				c);
