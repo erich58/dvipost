@@ -118,7 +118,6 @@ int DviFont_tfm (DviFont *font)
 	(void) tfm_dim(file);	/* words in kern table */
 	(void) tfm_dim(file);	/* words in extensible char table */
 	(void) tfm_dim(file);	/* words of font parameter data */
-	message(STAT, "$!: %s nw=%d nh=%d nd=%d\n", tfm_buf, nw, nh, nd);
 
 	tfm_skip(file, 4 * lh);
 
