@@ -72,7 +72,7 @@ int df_signed (DVIFile *df, unsigned len)
 }
 
 
-char *df_string (DVIFile *df, unsigned len)
+char *df_string (DVIFile *df, char *tg, unsigned len)
 {
 	static char buf[256];
 	int n;
@@ -80,11 +80,13 @@ char *df_string (DVIFile *df, unsigned len)
 	if	(len > 255)
 		df_fatal(df, "can't read string of size %d", len);
 
-	for (n = 0; df->ok && len-- > 0; n++)
-		buf[n] = df_byte(df);
+	if	(tg == NULL)	tg = &buf;
 
-	buf[n] = 0;
-	return buf;
+	for (n = 0; df->ok && len-- > 0; n++)
+		tg[n] = df_byte(df);
+
+	tg[n] = 0;
+	return tg;
 }
 
 void df_trace (DVIFile *df, const char *fmt, ...)

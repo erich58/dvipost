@@ -35,7 +35,7 @@ static void parse_pre (DVIFile *df, FILE *out)
 	putval(out, 4, df_unsigned(df, 4));
 	n = df_byte(df);
 	putval(out, 1, n);
-	desc = df_string(df, n);
+	desc = df_string(df, NULL, n);
 	fwrite(desc, 1, n, out);
 	df_trace(df, "'%s'\n", desc);
 }
@@ -59,7 +59,7 @@ static void parse_fntdef (DVIFile *df, FILE *out, int n)
 	putval(out, 1, a);
 	putval(out, 1, l);
 
-	name = df_string(df, a + l);
+	name = df_string(df, NULL, a + l);
 	fwrite(name, 1, a + l, out);
 	df_trace(df, " %s", name);
 
