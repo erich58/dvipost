@@ -1,0 +1,47 @@
+ltxpost - a latex post filter command to support change bars
+and overstrike mode.
+
+Compiling ltxpost:
+
+make
+
+Use of ltxpost:
+
+latex <name>[.tex]
+ltxpost <name>.dvi <name>.dvi
+
+note: ltxpost alllows to use the same name for input and output.
+A second call to ltxpost does not change the file.
+
+The interface:
+
+\usepackage{dvipost}
+
+The following macro must be called if any layout parameter
+like \evensidemargin ... is changed after including dvipost.sty.
+
+\dvipostlayout
+
+change bars:
+
+\changestart Text marked as changed \changeend
+\textchanged{Text marked as changed}
+
+overstrike mode:
+
+\overstrikeon Overstriked text \overstrikeoff
+\overstrike{Overstriked text}
+
+Additional to this modes, ltxpost allows to display the
+page layout. This is done by calling
+
+\dvipost{layout=<length>}
+
+with <length> > 0. ltxpost accepts lengths in pt, in, mm and cm.
+
+You can also use tex lengths in combination with the \the command:
+
+\dvipost{layout=\the\fboxrule}
+
+Have a look at dvipost.sty and test.tex to see more details
+of the interface.
