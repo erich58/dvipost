@@ -114,13 +114,12 @@ Makefile: configure Makefile.in
 
 test:: test.dvi test.ps
 
-test.ps test.dvi test.pre test.post: $(NAME) test.tex dvipost.sty
+test.ps test.dvi test.post: $(NAME) test.tex dvipost.sty
 	latex test
-	dvitype test.dvi | sed -f filter.sed > test.pre
 	$(NAME) -debug test.dvi test.dvi 2> test.post
 	dvips -o test.ps test.dvi
 
-purge::; rm -f test.ps test.dvi test.pre test.post
+purge::; rm -f test.ps test.dvi test.post
 
 # additional cleaning rules
 
