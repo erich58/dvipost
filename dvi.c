@@ -36,9 +36,12 @@ static void parse_pre (DviFile *df, DviFile *out)
 	df_trace(df, "magnification=%d; %16.8f pixels per DVI unit \n",
 		df->mag, df->conv);
 
-	dout_signed(out, df->num, 4);
-	dout_signed(out, df->den, 4);
-	dout_signed(out, df->mag, 4);
+	out->num = df->num;
+	out->den = df->den;
+	out->mag = df->mag;
+	dout_signed(out, out->num, 4);
+	dout_signed(out, out->den, 4);
+	dout_signed(out, out->mag, 4);
 
 	n = din_byte(df);
 	desc = din_string(df, NULL, n);
@@ -66,77 +69,50 @@ static void trace_fdef (DviFile *df, DviFontDef *fdef)
 	df_trace(df, "\n");
 }
 
-static int parse_post(DviFile *df, DviFile *out)
+static int parse_post (DviFile *df, DviFile *out)
 {
 	int c, n;
 	unsigned start;
 	DviFontDef *fdef;
+	int l, w;
 
 	start = df->pos - 1;
-	df_trace(df, "Postamble starts at byte %d.\n", start);
-	dout_unsigned(out, din_unsigned(df, 4), 4);
-	dout_unsigned(out, din_unsigned(df, 4), 4);
-	dout_unsigned(out, din_unsigned(df, 4), 4);
-	dout_unsigned(out, din_unsigned(df, 4), 4);
-	dout_unsigned(out, din_unsigned(df, 4), 4);
-	dout_unsigned(out, din_unsigned(df, 4), 4);
-	dout_unsigned(out, din_unsigned(df, 2), 2);
-	dout_unsigned(out, din_unsigned(df, 2), 2);
 
-	c = din_byte(df);
+	if	(din_signed(df, 4) != df->last_page)
+		df_fatal(df, "page offset error.");
 
-	while (df->ok)
-	{
-		switch (c)
-		{
-		case DVI_NOP:	/* no operation */
-			dout_byte(out, c);
-			break;
-		case DVI_FNT_DEF1: /* define the meaning of a font number */
-		case DVI_FNT_DEF2: /* ??? */
-		case DVI_FNT_DEF3: /* ??? */
-		case DVI_FNT_DEF4: /* ??? */
-			fdef = din_fontdef(df, c);
+	din_signed(df, 4);
+	din_signed(df, 4);
+	din_signed(df, 4);
+	l = din_signed(df, 4);
+	w = din_signed(df, 4);
+	din_unsigned(df, 2);
+	din_unsigned(df, 2);
 
-			if	(fdef)
-			{
-				df->trace = 1;
-				trace_fdef(df, fdef);
-				df->trace = 0;
-			}
+	start = out->pos;
+	dout_byte(out, DVI_POST);
+	dout_signed(out, out->last_page, 4);
+	dout_signed(out, out->num, 4);
+	dout_signed(out, out->den, 4);
+	dout_signed(out, out->mag, 4);
+	dout_signed(out, l, 4);
+	dout_signed(out, w, 4);
+	dout_unsigned(out, out->mdepth, 2);
+	dout_unsigned(out, out->npages, 2);
 
-			break;
-		case DVI_POST_POST:	/* postamble beginning */
-			dout_fonttab(out);
-			n = df->pos - 1;
+	dout_fonttab(out);
 
-			if	(din_unsigned(df, 4) != start)
-				df_fatal(df, "Incorrect start of Postamble.");
+	dout_byte(out, DVI_POST_POST);
+	dout_unsigned(out, start, 4);
+	dout_byte(out, 2);
 
-			if	(din_byte(df) != 2)
-				df_fatal(df, "Bad Postamble: id byte not 2.");
+	for (n = 0; n < 4; n++)
+		dout_byte(out, 223);
 
-			dout_byte(out, c);
-			dout_unsigned(out, start, 4);
-			dout_byte(out, 2);
-			n = 8 - (n + 6) % 4;
+	while (out->pos % 4 != 0)
+		dout_byte(out, 223);
 
-			if	(n == 8)	n = 4;
-
-			while (n-- > 0)
-				dout_byte(out, 223);
-
-			return out->ok ? 0 : 1;
-		default:
-			df_fatal(df, "Command %d not allowed in postamble.",
-				c);
-			break;
-		}
-
-		c = din_byte(df);
-	}
-
-	return 1;
+	return out->ok ? 0 : 1;
 }
 
 
@@ -145,9 +121,10 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 	DviFile dvifile[2], *df, *out;
 	DviExtension *ext;
 	DviFontDef *fdef;
-	int par;
+	int page_count[10];
 	int pos;
 	int c;
+	int i;
 
 	df = df_init(dvifile, id, ifile);
 	out = df_init(dvifile + 1, "<tmpfile>", ofile);
@@ -205,36 +182,44 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 			dout_byte(out, c);
 			break;
 		case DVI_BOP:	/* beginning of page */
-			dout_byte(out, c);
-			par = din_unsigned(df, 4);
-			dout_unsigned(out, par, 4);
-			df_trace(df, "%d: beginning of page %d\n", pos, par);
-			dout_unsigned(out, din_unsigned(df, 4), 4);
-			dout_unsigned(out, din_unsigned(df, 4), 4);
-			dout_unsigned(out, din_unsigned(df, 4), 4);
-			dout_unsigned(out, din_unsigned(df, 4), 4);
-			dout_unsigned(out, din_unsigned(df, 4), 4);
-			dout_unsigned(out, din_unsigned(df, 4), 4);
-			dout_unsigned(out, din_unsigned(df, 4), 4);
-			dout_unsigned(out, din_unsigned(df, 4), 4);
-			dout_unsigned(out, din_unsigned(df, 4), 4);
+			for (i = 0; i < 10; i++)
+				page_count[i] = din_signed(df, 4);
 
-			par = din_unsigned(df, 4);
-			df_trace(df, "%d: %d\n", df->pos - 4, par);
-			dout_unsigned(out, par, 4);
-			/*
-			dout_unsigned(out, din_unsigned(df, 4), 4);
-			*/
+			if	(din_signed(df, 4) != df->last_page)
+				df_fatal(df, "page offset error.");
+
+			df->npages++;
+			df->last_page = pos;
+
+			df_trace(df, "%d: beginning of page %d\n",
+				pos, page_count[0]);
+
+			pos = out->pos;
+			dout_byte(out, c);
+
+			for (i = 0; i < 10; i++)
+				dout_signed(out, page_count[i], 4);
+
+			dout_signed(out, out->last_page, 4);
+			out->last_page = pos;
+			out->npages++;
 			break;
 		case DVI_EOP:	/* ending of page */
 			dout_byte(out, c);
 			df_trace(df, "%d: eop\n", pos);
 			break;
 		case DVI_PUSH:	/* save the current positions */
-			dout_byte(out, c);
 			df_trace(df, "%d: push\n", pos);
+
+			out->depth++;
+
+			if	(out->mdepth < out->depth)
+				out->mdepth = out->depth;
+
+			dout_byte(out, c);
 			break;
 		case DVI_POP:	/* restore previous positions */
+			out->depth--;
 			dout_byte(out, c);
 			df_trace(df, "%d: pop\n", pos);
 			break;
@@ -388,7 +373,7 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 			df_fatal(df, "PRE occures within file.");
 			break;
 		case DVI_POST:	/* postamble beginning */
-			dout_byte(out, c);
+			df_trace(df, "Postamble starts at byte %d.\n", pos);
 			return parse_post(df, out);
 		case DVI_POST_POST: /* postamble ending */
 			df_fatal(df, "POST_POST without PRE.");

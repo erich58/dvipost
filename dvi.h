@@ -20,6 +20,10 @@ typedef struct {
 	int mag;	/* magnification */
 	double conv;	
 	double true_conv;
+	int last_page;	/* offset of last page */
+	int depth;	/* stack depth */
+	int mdepth;	/* maximum depth size */
+	int npages;	/* number of pages */
 } DviFile;
 
 extern DviFile *df_init (DviFile *buf, const char *name, FILE *file);

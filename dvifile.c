@@ -16,6 +16,10 @@ DviFile *df_init (DviFile *df, const char *name, FILE *file)
 	df->file = file;
 	df->ok = 1;
 	df->pos = 0;
+	df->last_page = -1;
+	df->depth = 0;
+	df->mdepth = 0;
+	df->npages = 0;
 	return df;
 }
 
