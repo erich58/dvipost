@@ -18,6 +18,12 @@ If not, write to the Free Software Foundation, Inc.,
 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 */
 
+#ifdef	TEX_WITHOUT_OPTIONS
+#define	TEX_ACCEPTS_OPTIONS	1
+#else
+#define	TEX_ACCEPTS_OPTIONS
+#endif
+
 static char *version = "dvipost version 0.8\n\
 Dvipost is copyright (C) 2002 Erich Fruehstueck.\n";
 
@@ -32,8 +38,10 @@ char **tex_argv = NULL;
 int tex_argc = 0;
 
 static int dvipost_help (char **argv, char *oarg);
+static int dvipost_version (char **argv, char *oarg);
 static int pptex_help (char **argv, char *oarg);
 
+#if	TEX_ACCEPT_OPTIONS
 static int pptex_arg (char **argv, char *oarg)
 {
 	tex_argv[tex_argc++] = argv[0];
@@ -59,6 +67,7 @@ static int pptex_version (char **argv, char *oarg)
 	tex_argv[tex_argc++] = argv[0];
 	return 1;
 }
+#endif
 
 static int dvipost_debug (char **argv, char *oarg)
 {
@@ -74,6 +83,7 @@ typedef struct {
 } ODEF;
 
 static ODEF pptex_odef[] = {
+#if	TEX_ACCEPT_OPTIONS
 	{ "fmt", NULL, pptex_arg },
 	{ "ini", NULL, pptex_noarg },
 	{ "interaction", NULL, pptex_arg },
@@ -85,8 +95,12 @@ static ODEF pptex_odef[] = {
 	{ "progname", NULL, pptex_arg },
 	{ "shell-escape", NULL, pptex_noarg },
 	{ "translate-file", NULL, pptex_arg },
-	{ "help", NULL, pptex_help },
+	{ "help", "display this help and exit", pptex_help },
 	{ "version", NULL, pptex_version },
+#else
+	{ "help", NULL, pptex_help },
+	{ "version", "output version information and exit", dvipost_version },
+#endif
 	{ "debug", "increase dvipost debug level", dvipost_debug },
 	{ NULL, NULL, NULL },
 };
@@ -113,7 +127,11 @@ static int pptex_help (char **argv, char *oarg)
 {
 	ODEF *odef;
 
+#if	TEX_ACCEPT_OPTIONS
 	printf("Usage: %s [-debug] [TEXARGS]\n\n", pname);
+#else
+	printf("Usage: %s [-help] [-version] [-debug] [TEXARGS]\n\n", pname);
+#endif
 
 	printf("Run %s and process DVI file with dvipost.\n",
 		tex_argv[0]);
@@ -125,10 +143,14 @@ static int pptex_help (char **argv, char *oarg)
 			printf("-%-12s %s\n", odef->name, odef->desc);
 	}
 
+#if	TEX_ACCEPT_OPTIONS
 	printf("\nAll other options and arguments are passed to %s.\n",
 		tex_argv[0]);
 	printf("\n");
 	tex_argv[tex_argc++] = argv[0];
+#else
+	exit(EXIT_SUCCESS);
+#endif
 	return 1;
 }
 
