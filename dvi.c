@@ -300,7 +300,7 @@ static void set_float (void *par, const char *arg)
 
 static void set_page_stat (void *par, const char *arg)
 {
-	page_stat = (int) par;
+	page_stat = (int) (size_t) par;
 }
 
 static PostCmd cmd_tab[] = {
