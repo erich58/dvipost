@@ -13,19 +13,19 @@
 
 \dvipostlayout	% transfer layout parameters to dvipost
 
-\special{dvipost: layout=0.5pt}
-%\special{dvipost: cbframe=1}
-\special{dvipost: osstart color push Red}
-\special{dvipost: osend color pop}
-\special{dvipost: cbstart color push Blue}
-\special{dvipost: cbend color pop}
-%\special{dvipost: cbrule=2pt}
-%\special{dvipost: cbsep=12pt}
-\special{dvipost: cbsep=2pt}
-\special{dvipost: cbexp=12pt}
-%\special{dvipost: cbexp=0pt}
-\special{dvipost: osrule=1pt}
-%\special{dvipost: osrule=\the\fboxrule}
+\dvipost{layout=0.5pt}
+%\dvipost{cbframe=1}
+\dvipost{osstart color push Red}
+\dvipost{osend color pop}
+\dvipost{cbstart color push Blue}
+\dvipost{cbend color pop}
+%\dvipost{cbrule=2pt}
+%\dvipost{cbsep=12pt}
+\dvipost{cbsep=2pt}
+\dvipost{cbexp=12pt}
+%\dvipost{cbexp=0pt}
+\dvipost{osrule=1pt}
+%\dvipost{osrule=\the\fboxrule}
 
 %	some test macos
 
