@@ -3,6 +3,7 @@ ltxpost
 dvipost
 dvipost.man
 dvipost.tex
+dvipost.html
 pplatex
 pptex
 config.log
