@@ -2,4 +2,7 @@ ltxpost
 *.o
 *.dvi
 *.log
+*.aux
 *.ps
+*.pre
+*.post

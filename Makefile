@@ -1,6 +1,6 @@
 CFLAGS=	-g -Wall -Wmissing-prototypes -D_XOPEN_SOURCE
 
-all:: ltxpost tags test ps
+all:: ltxpost tags test
 
 #	basic functions
 
@@ -52,26 +52,18 @@ clean::; rm -f tags
 
 #	run test
 
-test:: test.log ptest.dvi ptest.log
+test:: test.dvi test.ps
 
-test.dvi: test.tex dvipost.sty
+test.ps test.dvi test.pre test.post: test.tex dvipost.sty
 	latex test
-	rm -f test.log test.aux
+	dvitype test.dvi | sed -f filter.sed > test.pre
+	ltxpost -v test.dvi test.dvi 2> test.post
+	dvips -o test.ps test.dvi
 
-test.log: test.dvi filter.sed
-	dvitype test.dvi | sed -f filter.sed > $@
+purge::; rm -f test.ps test.dvi test.pre test.post
 
-purge::; rm -f test.log
+#	additional cleaning rules
 
-ptest.dvi ptest.log: test.dvi ltxpost
-	ltxpost -v test.dvi ptest.dvi 2> ptest.log
-
-purge::; rm -f ptest.dvi ptest.log
-
-ps:: ptest.ps
-
-ptest.ps: ptest.dvi; dvips -o $@ ptest.dvi
-
-purge::; rm -f ptest.ps
-
+purge::; rm -f *.log *.aux
 clean:: purge
+
