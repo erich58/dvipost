@@ -43,7 +43,7 @@ FILES=	dvipost.sty
 
 # generating rules
 
-all:: $(NAME) $(ALIAS) tags test
+all:: $(NAME) $(ALIAS) tags
 
 #	basic functions
 
@@ -80,15 +80,6 @@ $(ALIAS): $(NAME)
 
 clean::; rm -f $(ALIAS)
 
-#	rules for ctags file
-
-SRC=	main.c $(HDR) $(BASE) $(DVIHDR) $(DVI)
-
-tags: $(SRC)
-	ctags $(SRC)
-
-clean::; rm -f tags
-
 # install style files
 
 install::
@@ -104,6 +95,9 @@ install::
 
 uninstall::
 	for p in $(FILES); do rm -f $(LATEX)/$$p; done
+
+distclean:
+	rm -f config.cache config.log config.status Makefile
 
 # rebuild rules
 
@@ -127,6 +121,15 @@ purge::; rm -f *.log *.aux
 clean:: purge
 
 ### local stuff ###
+
+# rules for ctags file
+
+SRC=	main.c $(HDR) $(BASE) $(DVIHDR) $(DVI)
+
+tags: $(SRC)
+	ctags $(SRC)
+
+clean::; rm -f tags
 
 # rules to create archiv
 
