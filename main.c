@@ -24,7 +24,7 @@ If not, write to the Free Software Foundation, Inc.,
 #define	TEX_ACCEPT_OPTIONS	1
 #endif
 
-static char *version = "dvipost version 0.8\n\
+static char *version = "dvipost version 1.0\n\
 Dvipost is copyright (C) 2002 Erich Fruehstueck.\n";
 
 #include "dvipost.h"
@@ -166,6 +166,7 @@ static int dvipost_help (char **argv, char *oarg)
 			printf("-%-12s %s\n", odef->name, odef->desc);
 	}
 
+	exit(EXIT_SUCCESS);
 	return 1;
 }
 
