@@ -48,22 +48,28 @@ SRC=	ltxpost.c $(HDR) $(BASE) $(DVIHDR) $(DVI) $(PDFHDR) $(PDF)
 tags: $(SRC)
 	ctags $(SRC)
 
-clean::; rm -f ctags
+clean::; rm -f tags
 
 #	run test
 
-test:: test.txt test.log
+test:: test.log ptest.dvi ptest.log
 
 test.dvi: test.tex
 	latex test
 	rm -f test.log test.aux
 
-NO_HH=	-e 's/[, ]*hh[:=]*[-0-9][0-9]*//g'
-NO_VV=	-e 's/[, ]*vv[:=]*[-0-9][0-9]*//g'
+FILTER=	sed -e '1,/1 $$/d' \
+	-e 's/[, ]*hh[:=]*[-0-9][0-9]*//g' \
+	-e 's/[, ]*vv[:=]*[-0-9][0-9]*//g'
 
-test.txt: test.dvi; dvitype test.dvi | sed -e '1,/^ $$/d' $(NO_HH) $(NO_VV) > $@
-test.log: test.dvi ltxpost; ltxpost -v test.dvi 2> $@
+test.log: test.dvi
+	dvitype test.dvi | $(FILTER) > $@
 
-purge::; rm -f test.txt test.log test.dvi
+purge::; rm -f test.log
+
+ptest.dvi ptest.log: test.dvi ltxpost
+	ltxpost -v test.dvi ptest.dvi 2> ptest.log
+
+purge::; rm -f ptest.dvi ptest.log
 
 clean:: purge

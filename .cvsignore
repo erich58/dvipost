@@ -1,5 +1,4 @@
 ltxpost
 *.o
-test.dvi
-test.1
-test.2
+*.dvi
+*.log
