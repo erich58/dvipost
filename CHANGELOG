@@ -1,7 +1,12 @@
 Version 0.9:
 
-Added autoconf script to create Makefile.
-Included some missing headers into source files.
+Added autoconf script to create Makefile. To make dvipost,
+do the following:
+
+configure	# create Makefile
+make		# create binaries
+make test	# run test (optional)
+make install	# install binaries and styles (may need root privileges)
 
 Support for interactive running (la)tex: Run dvipost
 on all *.dvi files which are changed after running (la)tex.
@@ -10,5 +15,7 @@ Support for old teTeX versions which have a different
 syntax of running latex (no options allowed) and kpsewhich
 (needs type of requested file as first argument).
 (for example: teTeX 0.3.4).
+
+Fixed some missing headers in source files.
 
 Testet under AIX 3.2 with xlc.
