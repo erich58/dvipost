@@ -81,7 +81,7 @@ static void dout_move (DviFile *df, int base, int val)
 	if	(val)
 	{
 		int len = wordlen(val);
-		dout_byte(df, base + val - 1);
+		dout_byte(df, base + len - 1);
 		dout_signed(df, val, len);
 	}
 }
