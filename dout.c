@@ -39,12 +39,76 @@ void dout_signed (DviFile *df, int val, unsigned len)
 }
 
 
-void dout_string (DviFile *df, char *buf, unsigned len)
+void dout_string (DviFile *df, const char *buf, unsigned len)
 {
 	while (len-- > 0)
 		dout_byte(df, *(buf++));
 }
 
+void dout_special (DviFile *df, const char *arg)
+{
+	int len = arg ? strlen(arg) : 0;
+
+	if	(len == 0)	return;
+
+	if	(len < 256)
+	{
+		dout_byte(df, DVI_XXX1);
+		dout_unsigned(df, len, 1);
+		dout_string(df, arg, len);
+	}
+	else
+	{
+		dout_byte(df, DVI_XXX4);
+		dout_unsigned(df, len, 4);
+		dout_string(df, arg, len);
+	}
+}
+
+static int wordlen (int x)
+{
+	if	(x == 0)	return 0;
+	if	(x <  0)	x = -x;
+	if	(x < 0x80)	return 1;
+	if	(x < 0x8000)	return 2;
+	if	(x < 0x800000)	return 3;
+
+	return 4;
+}
+
+static void dout_move (DviFile *df, int base, int val)
+{
+	if	(val)
+	{
+		int len = wordlen(val);
+		dout_byte(df, base + val - 1);
+		dout_signed(df, val, len);
+	}
+}
+
+void dout_right (DviFile *df, int val)
+{
+	dout_move(df, DVI_RIGHT1, val);
+}
+
+void dout_down (DviFile *df, int val)
+{
+	dout_move(df, DVI_DOWN1, val);
+}
+
+extern void dout_setrule (DviFile *df, int h, int w)
+{
+	dout_byte(df, DVI_SET_RULE);
+	dout_signed(df, h, 4);
+	dout_signed(df, w, 4);
+}
+
+extern void dout_putrule (DviFile *df, int h, int w)
+{
+	dout_byte(df, DVI_PUT_RULE);
+	dout_signed(df, h, 4);
+	dout_signed(df, w, 4);
+}
 
 void dout_token (DviFile *df, DviToken *tok)
 {

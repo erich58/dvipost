@@ -31,7 +31,12 @@ extern char *din_string (DviFile *df, unsigned len);
 extern void dout_byte (DviFile *df, int val);
 extern void dout_signed (DviFile *df, int val, unsigned len);
 extern void dout_unsigned (DviFile *df, unsigned val, unsigned len);
-extern void dout_string (DviFile *df, char *buf, unsigned len);
+extern void dout_string (DviFile *df, const char *buf, unsigned len);
+extern void dout_special (DviFile *df, const char *arg);
+extern void dout_right (DviFile *df, int val);
+extern void dout_down (DviFile *df, int val);
+extern void dout_setrule (DviFile *df, int h, int w);
+extern void dout_putrule (DviFile *df, int h, int w);
 
 /*	token
 */
