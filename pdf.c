@@ -5,7 +5,7 @@
 
 #include "dvipost.h"
 
-int process_pdf (FILE *in, FILE *out)
+int process_pdf (const char *id, FILE *in, FILE *out)
 {
 	int c;
 

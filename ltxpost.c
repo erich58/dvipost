@@ -111,10 +111,10 @@ int main (int argc, char **argv)
 	switch (c)
 	{
 	case DVI_PRE:
-		stat = process_dvi(input, tmp);
+		stat = process_dvi(iname, input, tmp);
 		break;
 	case '%':
-		stat = process_pdf(input, tmp);
+		stat = process_pdf(iname, input, tmp);
 		break;
 	default:
 		message(ERR, "$!: Bad magic: "

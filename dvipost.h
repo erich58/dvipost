@@ -18,7 +18,7 @@ extern char *pname;
 extern int verboselevel;
 extern void message (int level, const char *fmt, ...);
 
-extern int process_dvi (FILE *in, FILE *out);
-extern int process_pdf (FILE *in, FILE *out);
+extern int process_dvi (const char *id, FILE *in, FILE *out);
+extern int process_pdf (const char *id, FILE *in, FILE *out);
 
 #endif	/* dvipost.h */

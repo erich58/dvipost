@@ -6,7 +6,7 @@
 #include "dvipost.h"
 #include "dvi.h"
 
-int process_dvi (FILE *in, FILE *out)
+int process_dvi (const char *id, FILE *in, FILE *out)
 {
 	int c;
 
@@ -14,7 +14,7 @@ int process_dvi (FILE *in, FILE *out)
 
 	if	(c != 2)
 	{
-		message(ERR, "$!: Bad DVI file: id byte not 2.\n");
+		message(ERR, "$!: %s: Bad DVI file: id byte not 2.\n", id);
 		return 1;
 	}
 
