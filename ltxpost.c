@@ -1,10 +1,10 @@
-/*	postfilter
+/*	LaTeX - Postfilter
 	$Copyright (C) 2002 Erich Frühstück
 	A-3423 St.Andrä/Wördern, Südtirolergasse 17-21/5
 */
 
 
-#include "dvipost.h"
+#include "ltxpost.h"
 #include "dvi.h"
 #include <unistd.h>
 #include <getopt.h>

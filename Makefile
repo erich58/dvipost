@@ -1,13 +1,13 @@
 CFLAGS=	-g -Wall -Wmissing-prototypes -D_POSIX_SOURCE
 
-all:: dvipost
+all:: ltxpost
 
-OBJ=	dvipost.o message.o pdf.o dvi.o
+OBJ=	ltxpost.o message.o pdf.o dvi.o
 
-$(OBJ): dvipost.h dvi.h
+$(OBJ): ltxpost.h dvi.h
 
 clean::
-	rm -f dvipost $(OBJ)
+	rm -f ltxpost $(OBJ)
 
-dvipost: $(OBJ)
+ltxpost: $(OBJ)
 	$(CC) -o $@ $(OBJ)

@@ -3,10 +3,10 @@
 	A-3423 St.Andrä/Wördern, Südtirolergasse 17-21/5
 */
 
-#include "dvipost.h"
+#include "ltxpost.h"
 #include <stdarg.h>
 
-char *pname = "DVIPost";
+char *pname = "LaTeXPost";
 int verboselevel = NOTE;
 
 void message (int level, const char *fmt, ...)

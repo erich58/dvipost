@@ -3,7 +3,7 @@
 	A-3423 St.Andrä/Wördern, Südtirolergasse 17-21/5
 */
 
-#include "dvipost.h"
+#include "ltxpost.h"
 #include "dvi.h"
 
 int process_dvi (const char *id, FILE *in, FILE *out)

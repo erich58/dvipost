@@ -3,7 +3,7 @@
 	A-3423 St.Andrä/Wördern, Südtirolergasse 17-21/5
 */
 
-#include "dvipost.h"
+#include "ltxpost.h"
 
 int process_pdf (const char *id, FILE *in, FILE *out)
 {
