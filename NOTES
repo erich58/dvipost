@@ -1,5 +1,1 @@
-The size of an integer is ausumed to be at least 4 Bytes long.
-
-The din_signed() and din_unsigned() functions may fail on
-cc implementations whith do not use two's complement for
-negative numbers.
+The size of an integer is assumed to be at least 4 Bytes long.

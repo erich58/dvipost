@@ -14,9 +14,9 @@ clean::; rm -f $(BASE:.c=.o)
 #	dvi specific functions
 
 DVIHDR=	dvi.h dvicmd.h
-DVI=	dvifile.c din.c dout.c dviex.c dvi.c
+DVI=	dvifile.c din.c dout.c dviex.c dvifont.c dvi.c
 
-$(DVI:c=.o): $(HDR) $(DVIHDR)
+$(DVI:.c=.o): $(HDR) $(DVIHDR)
 
 clean::; rm -f $(DVI:.c=.o)
 
@@ -25,7 +25,7 @@ clean::; rm -f $(DVI:.c=.o)
 PDFHDR=	
 PDF=	pdf.c
 
-$(PDF:c=.o): $(HDR) $(PDFHDR)
+$(PDF:.c=.o): $(HDR) $(PDFHDR)
 
 clean::; rm -f $(PDF:.c=.o)
 

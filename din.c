@@ -21,9 +21,9 @@ int din_byte (DviFile *df)
 }
 
 
-int din_unsigned (DviFile *df, unsigned len)
+unsigned din_unsigned (DviFile *df, unsigned len)
 {
-	int val = din_byte(df);
+	unsigned val = din_byte(df);
 
 	while (df->ok && --len > 0)
 		val = val * 256 + din_byte(df);
@@ -36,8 +36,8 @@ int din_signed (DviFile *df, unsigned len)
 {
 	int val = din_byte(df);
 
-	if	(val > 127)
-		val = 256 - val;
+	if	(val >= 128)
+		val -= 256;
 
 	while (df->ok && --len > 0)
 		val = val * 256 + din_byte(df);

@@ -6,6 +6,8 @@
 #include "ltxpost.h"
 #include "dvi.h"
 
+#define	RESOLUTION	300.
+
 static void parse_pre (DviFile *df, DviFile *out)
 {
 	unsigned n;
@@ -22,45 +24,53 @@ static void parse_pre (DviFile *df, DviFile *out)
 	}
 
 	dout_byte(out, n);
-	dout_unsigned(out, din_unsigned(df, 4), 4);
-	dout_unsigned(out, din_unsigned(df, 4), 4);
-	dout_unsigned(out, din_unsigned(df, 4), 4);
+
+	df->num = din_signed(df, 4);
+	df->den = din_signed(df, 4);
+	df->mag = din_signed(df, 4);
+
+	df_trace(df, "  Resolution = %.8f pixels per inch \n", RESOLUTION);
+	df_trace(df, "numerator/denominator=%d/%d \n", df->num, df->den);
+	df->true_conv = (df->num / 254000.0) * (RESOLUTION / df->den);
+	df->conv = df->true_conv * (df->mag / 1000.);
+	df_trace(df, "magnification=%d; %16.8f pixels per DVI unit \n",
+		df->mag, df->conv);
+
+	dout_signed(out, df->num, 4);
+	dout_signed(out, df->den, 4);
+	dout_signed(out, df->mag, 4);
+
 	n = din_byte(df);
-	dout_byte(out, n);
 	desc = din_string(df, NULL, n);
+
+	dout_byte(out, n);
 	dout_string(out, desc, n);
 	df_trace(df, "'%s'\n", desc);
 }
 
-static void parse_fntdef (DviFile *df, DviFile *out, int n)
+static void trace_fdef (DviFile *df, DviFontDef *fdef)
 {
-	int font;
-	int a, l;
-	char *name;
+	df_trace(df, "Font %d: %s", fdef->font, fdef->name);
 
-	font = din_unsigned(df, n);
-	dout_unsigned(out, font, n);
-	df_trace(df, "Font %d:", font);
+	if	(fdef->scale > 0 && fdef->dsize > 0)
+	{
+		int m = (1000. * df->conv * fdef->scale) /
+			(df->true_conv * fdef->dsize) + 0.5;
 
-	dout_unsigned(out, din_unsigned(df, 4), 4);
-	dout_unsigned(out, din_unsigned(df, 4), 4);
-	dout_unsigned(out, din_unsigned(df, 4), 4);
+		if	(m != 1000)
+			df_trace(df, " scaled %d", m);
+	}
 
-	a = din_byte(df);
-	l = din_byte(df);
-	name = din_string(df, NULL, a + l);
-
-	df_trace(df, " %s\n", name);
-
-	dout_byte(out, a);
-	dout_byte(out, l);
-	dout_string(out, name, a + l);
+	/* the next output information is a lie */
+	df_trace(df, "---loaded at size %d DVI units ", fdef->scale);
+	df_trace(df, "\n");
 }
 
 static int parse_post(DviFile *df, DviFile *out)
 {
 	int c, n;
 	unsigned start;
+	DviFontDef *fdef;
 
 	start = df->pos - 1;
 	df_trace(df, "Postamble starts at byte %d.\n", start);
@@ -83,22 +93,21 @@ static int parse_post(DviFile *df, DviFile *out)
 			dout_byte(out, c);
 			break;
 		case DVI_FNT_DEF1: /* define the meaning of a font number */
-			dout_byte(out, c);
-			parse_fntdef(df, out, 1);
-			break;
 		case DVI_FNT_DEF2: /* ??? */
-			dout_byte(out, c);
-			parse_fntdef(df, out, 2);
-			break;
 		case DVI_FNT_DEF3: /* ??? */
-			dout_byte(out, c);
-			parse_fntdef(df, out, 3);
-			break;
 		case DVI_FNT_DEF4: /* ??? */
-			dout_byte(out, c);
-			parse_fntdef(df, out, 4);
+			fdef = din_fontdef(df, c);
+
+			if	(fdef)
+			{
+				df->trace = 1;
+				trace_fdef(df, fdef);
+				df->trace = 0;
+			}
+
 			break;
 		case DVI_POST_POST:	/* postamble beginning */
+			dout_fonttab(out);
 			n = df->pos - 1;
 
 			if	(din_unsigned(df, 4) != start)
@@ -135,6 +144,7 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 {
 	DviFile dvifile[2], *df, *out;
 	DviExtension *ext;
+	DviFontDef *fdef;
 	int par;
 	int pos;
 	int c;
@@ -362,20 +372,17 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 			df_trace(df, "%d: xxx '%s'\n", pos, ext->buf);
 			break;
 		case DVI_FNT_DEF1: /* define the meaning of a font number */
-			dout_byte(out, c);
-			parse_fntdef(df, out, 1);
-			break;
 		case DVI_FNT_DEF2: /* ??? */
-			dout_byte(out, c);
-			parse_fntdef(df, out, 2);
-			break;
 		case DVI_FNT_DEF3: /* ??? */
-			dout_byte(out, c);
-			parse_fntdef(df, out, 3);
-			break;
 		case DVI_FNT_DEF4: /* ??? */
-			dout_byte(out, c);
-			parse_fntdef(df, out, 4);
+			fdef = din_fontdef(df, c);
+
+			if	(fdef)
+			{
+				trace_fdef(df, fdef);
+				dout_fontdef(out, fdef);
+			}
+
 			break;
 		case DVI_PRE:	/* preamble */
 			df_fatal(df, "PRE occures within file.");

@@ -19,7 +19,7 @@ void dout_byte (DviFile *df, int c)
 	else	df->pos++;
 }
 
-void dout_unsigned (DviFile *df, int val, unsigned len)
+void dout_unsigned (DviFile *df, unsigned val, unsigned len)
 {
 	if	(--len > 0)
 		dout_unsigned(df, val >> 8, len);
@@ -30,10 +30,12 @@ void dout_unsigned (DviFile *df, int val, unsigned len)
 
 void dout_signed (DviFile *df, int val, unsigned len)
 {
-	if	(--len > 0)
-		dout_signed(df, val >> 8, len);
-
-	dout_byte(df, val & 0xFF);
+	if	(val < 0)
+	{
+		unsigned x = 1 + (unsigned) - (val + 1);
+		dout_unsigned(df, 1 + ~x, len);
+	}
+	else	dout_unsigned(df, val, len);
 }
 
 
