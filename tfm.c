@@ -26,6 +26,12 @@ static char tfm_buf[1024];
 static int tfm_err = 0;
 static int tfm_pos = 0;
 
+#ifdef	KPSEWHICH_NEED_TYPE
+#define	GET_TFM	"kpsewhich tfm"
+#else
+#define	GET_TFM	"kpsewhich"
+#endif
+
 static unsigned tfm_byte (FILE *file)
 {
 	int c;
@@ -90,7 +96,7 @@ int DviFont_tfm (DviFont *font)
 	int i, n;
 
 	scale = DviFont_scale(font);
-	sprintf(tfm_buf, "kpsewhich %s.tfm\n", font->token.str);
+	sprintf(tfm_buf, "%s %s.tfm\n", GET_TFM, font->token.str);
 	file = popen(tfm_buf, "r");
 
 	if	(!file)
