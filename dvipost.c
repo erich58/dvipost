@@ -1,75 +1,34 @@
-/*	LaTeX - Postfilter
-	$Copyright (C) 2002 Erich Frühstück
-	A-3423 St.Andrä/Wördern, Südtirolergasse 17-21/5
+/*	dvi file post processing
+
+$Copyright (C) 2002 Erich Frühstück
+This file is part of pplatex.
+
+pplatex is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public
+License as published by the Free Software Foundation; either
+version 2 of the License, or (at your option) any later version.
+
+pplatex is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public
+License along with pplatex; see the file COPYING.
+If not, write to the Free Software Foundation, Inc.,
+59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
 #include "ltxpost.h"
 #include "dvi.h"
 #include <unistd.h>
-#include <getopt.h>
 
-/*	print usage information
-*/
-
-static void usage (int flag)
+int dvipost (const char *iname, const char *oname)
 {
-	fprintf(stderr, "usage: %s [-hqv] input [output]\n", pname);
-
-	if	(flag > 0)
-	{
-		fputs("\t-h this output.\n", stderr);
-		fputs("\t-q be quiet, report only errors.\n", stderr);
-		fputs("\t-v increase verbose level.\n", stderr);
-	}
-
-	exit(flag >= 0 ? EXIT_SUCCESS : EXIT_FAILURE);
-}
-
-/*	the main programm
-*/
-
-int main (int argc, char **argv)
-{
-	extern int optind;
-	extern char *optarg;
-	char *iname, *oname;
 	FILE *input, *tmp, *output;
-	int opt;
 	int c;
 	int stat;
-
-/*	parse optionms and args
-*/
-	pname = argv[0];
-
-	while ((opt = getopt(argc, argv, "hqv")) != -1)
-	{
-		switch (opt)
-		{
-		case 'h':
-			usage(1);
-			break;
-		case 'q':
-			verboselevel = 0;
-			break;
-		case 'v':
-			verboselevel++;
-			break;
-		default:
-			usage(-1);
-			break;
-		}
-	}
-
-	if	(optind == argc)
-		usage(-1);
-
-	iname = (optind < argc) ? argv[optind++] : NULL;
-	oname = (optind < argc) ? argv[optind++] : NULL;
-
-	if	(optind < argc)
-		usage(0);
 
 /*	open temporary file
 */
@@ -89,7 +48,7 @@ int main (int argc, char **argv)
 
 		if	(!input)
 		{
-			fprintf(stderr, "%s: ", pname);
+			fprintf(stderr, "%s: ", iname);
 			perror(iname);
 			fclose(tmp);
 			return EXIT_FAILURE;
@@ -112,13 +71,8 @@ int main (int argc, char **argv)
 	case DVI_PRE:
 		stat = process_dvi(iname, input, tmp);
 		break;
-	case '%':
-		stat = process_pdf(iname, input, tmp);
-		break;
 	default:
-		message(ERR, "$!: Bad magic: "
-			"%s is neither dvi nor pdf file.\n",
-			iname);
+		message(ERR, "$!: Bad magic: %s is not a dvi file.\n", iname);
 		stat = 1;
 		break;
 	}

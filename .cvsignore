@@ -1,4 +1,7 @@
 ltxpost
+dvipost
+pplatex
+pptex
 *.o
 *.dvi
 *.log

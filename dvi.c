@@ -68,10 +68,12 @@ static void set_unit (DviToken *token)
 	in_to_dvi = (254000. / dvi_unit.num) * (double) dvi_unit.den;
 	cm_to_dvi = (100000. / dvi_unit.num) * (double) dvi_unit.den;
 	mm_to_dvi = (10000. / dvi_unit.num) * (double) dvi_unit.den;
+	/*
 	message(NOTE, "1pt = %.0f dvi units.\n", pt_to_dvi);
 	message(NOTE, "1in = %.0f dvi units.\n", in_to_dvi);
 	message(NOTE, "1mm = %.0f dvi units.\n", mm_to_dvi);
 	message(NOTE, "1cm = %.0f dvi units.\n", cm_to_dvi);
+	*/
 }
 
 /*	debugging functions and macros
