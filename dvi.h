@@ -55,14 +55,26 @@ void dout_token (DviFile *df, DviToken *token);
 
 typedef struct {
 	DviToken token;	/* font def token */
-	int width[256]; /* font metric data */
+	int width[256]; /* character width */
+	int height[256]; /* character height */
+	int depth[256]; /* character depth */
+	int offset;	/* overstrike offset */
 } DviFont;
+
+#define	DviFont_num(x)		(x)->token.par[0]
+#define	DviFont_csum(x)		(x)->token.par[1]
+#define	DviFont_scale(x)	(x)->token.par[2]
+#define	DviFont_dsize(x)	(x)->token.par[3]
+#define	DviFont_name(x)		(x)->token.str
 
 extern DviFont *DviFontTab;
 extern int DviFontDim;
 
 extern DviFont *DviFont_get (int font);
 extern void DviFont_add (DviToken *token);
+
+extern int tfm_load (int *width, const char *name, int size);
+extern int DviFont_tfm (DviFont *font);
 
 extern DviFont *dvi_font;
 

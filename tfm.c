@@ -4,6 +4,7 @@
 */
 
 #include "ltxpost.h"
+#include "dvi.h"
 #include <ctype.h>
 
 static char tfm_buf[1024];
@@ -65,14 +66,16 @@ static int tfm_scale (int a, int b)
 	return ((al * bl / 32768) + a * bl + al * b) / 32 + a * b * 1024;
 }
 
-int tfm_load (int *width, const char *name, int scale)
+int DviFont_tfm (DviFont *font)
 {
 	FILE *file;
-	int wtab[256];
-	int lh, bc, ec, nw;
+	int *tab;
+	int scale;
+	int lh, bc, ec, nw, nh, nd;
 	int i, n;
 
-	sprintf(tfm_buf, "kpsewhich %s.tfm\n", name);
+	scale = DviFont_scale(font);
+	sprintf(tfm_buf, "kpsewhich %s.tfm\n", font->token.str);
 	file = popen(tfm_buf, "r");
 
 	if	(!file)
@@ -108,33 +111,61 @@ int tfm_load (int *width, const char *name, int scale)
 	bc = tfm_dim(file);	/* smallest character code */
 	ec = tfm_dim(file);	/* largest character code */
 	nw = tfm_dim(file);	/* words in width table */
-	(void) tfm_dim(file);	/* words in height table */
-	(void) tfm_dim(file);	/* words in depth table */
+	nh = tfm_dim(file);	/* words in height table */
+	nd = tfm_dim(file);	/* words in depth table */
 	(void) tfm_dim(file);	/* words in italic correction table */
 	(void) tfm_dim(file);	/* words in lig/kern table */
 	(void) tfm_dim(file);	/* words in kern table */
 	(void) tfm_dim(file);	/* words in extensible char table */
 	(void) tfm_dim(file);	/* words of font parameter data */
+	message(STAT, "$!: %s nw=%d nh=%d nd=%d\n", tfm_buf, nw, nh, nd);
+
 	tfm_skip(file, 4 * lh);
 
 	for (i = 0; i < 256; i++)
-		width[i] = 0;
+		font->width[i] = font->height[i] = font->depth[i] = 0;
 
 	for (i = bc; i <= ec; i++)
 	{
-		int n = tfm_byte(file);
+		int w = tfm_byte(file);
+		int h = tfm_byte(file);
 
-		if	(n < 256)
-			width[i] = n;
+		if	(i < 256)
+		{
+			font->width[i] = w;
+			font->height[i] = h / 16;
+			font->depth[i] = h % 16;
+		}
 
-		tfm_skip(file, 3);
+		tfm_skip(file, 2);
 	}
 
+	if	(ec >= 255)	ec = 255;
+
+	n = nw;
+
+	if	(nh > n)	n = nh;
+	if	(nd > n)	n = nd;
+
+	tab = xalloc(n * sizeof(int));
+
 	for (i = 0; i < nw; i++)
-		wtab[i] = tfm_scale(tfm_word(file), scale);
+		tab[i] = tfm_scale(tfm_word(file), scale);
 	
 	for (i = bc; i <= ec; i++)
-		width[i] = wtab[width[i]];
+		font->width[i] = tab[font->width[i]];
+
+	for (i = 0; i < nh; i++)
+		tab[i] = tfm_scale(tfm_word(file), scale);
+	
+	for (i = bc; i <= ec; i++)
+		font->height[i] = tab[font->height[i]];
+
+	for (i = 0; i < nd; i++)
+		tab[i] = tfm_scale(tfm_word(file), scale);
+	
+	for (i = bc; i <= ec; i++)
+		font->depth[i] = tab[font->depth[i]];
 
 	fclose(file);
 	return tfm_err;
