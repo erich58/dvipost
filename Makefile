@@ -59,7 +59,7 @@ test.dvi: test.tex
 	rm -f test.log test.aux
 
 test.1: test.dvi; dvitype test.dvi > test.1
-test.2: test.dvi; ltxpost -v test.dvi 2> test.2
+test.2: test.dvi ltxpost; ltxpost -v test.dvi 2> test.2
 
 purge::; rm -f test.1 test.2 test.dvi
 
