@@ -1,6 +1,6 @@
 CFLAGS=	-g -Wall -Wmissing-prototypes -D_XOPEN_SOURCE
 
-all:: ltxpost tags test
+all:: ltxpost tags test ps
 
 #	basic functions
 
@@ -72,5 +72,11 @@ ptest.dvi ptest.log: test.dvi ltxpost
 	ltxpost -v test.dvi ptest.dvi 2> ptest.log
 
 purge::; rm -f ptest.dvi ptest.log
+
+ps:: ptest.ps
+
+ptest.ps: ptest.dvi; dvips -o $@ ptest.dvi
+
+purge::; rm -f ptest.ps
 
 clean:: purge

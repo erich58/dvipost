@@ -2,3 +2,4 @@ ltxpost
 *.o
 *.dvi
 *.log
+*.ps
