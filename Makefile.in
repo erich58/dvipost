@@ -85,8 +85,8 @@ clean::; rm -f $(ALIAS)
 
 # install style files
 
-install: install-exec install-data install-man
-uninstall: uninstall-exec uninstall-data uninstall-man
+install: install-exec install-man install-data
+uninstall: uninstall-exec uninstall-man uninstall-data
 
 uninstall-exec:
 	for p in $(NAME) $(ALIAS); do rm -f $(BIN)/$$p; done
