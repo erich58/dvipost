@@ -170,7 +170,7 @@ clean::; rm -f tags
 export:: dvipost-1.0.tar.gz
 
 dvipost-1.0.tar.gz:
-	cvs export -r HEAD -d $(@:.tar.gz=) ltxpost
+	cvs export -r V1_0 -d $(@:.tar.gz=) ltxpost
 	(cd $(@:.tar.gz=); \
 		sed -e '/local stuff/,$$d' Makefile.in > .tmp; \
 		mv .tmp Makefile.in; \
