@@ -3,13 +3,15 @@
 
 \parskip\baselineskip
 
-% parameters
+% dvipost parameters
 
 \special{dvipost: showlayout=1}
-\special{dvipost: cbrule=\the\fboxrule}
-\special{dvipost: offset=2pt}
+%\special{dvipost: cbframe=1}
 \special{dvipost: pre color push Blue}
 \special{dvipost: post color pop}
+\special{dvipost: cbrule=10pt}
+\special{dvipost: thickness=1pt}
+%\special{dvipost: thickness=\the\fboxrule}
 
 % interface macros
 
@@ -29,7 +31,7 @@
 \def\ce{\special{dvipost: cbmode=0}\color{Black}}
 \def\textchanged#1{\cs{}#1\ce{}}
 
-%	document
+%	test document
 
 \setlayout
 
@@ -42,12 +44,11 @@ Here comes the first paragraph.
 This text is not marked.
 
 Here is the second paragraph with some special markings.
-Here is a total marked formaular: \cs{}$\sum_{i=0}^{\infty}x_i$\ce{}.
+Here is a total marked formular: \cs{}$\sum_{i=0}^{\infty}x_i$\ce{}.
 This text is not marked.
 Here is a partial marked formular:
 $\sum_{\cs{}i\ce{}j=0}^{\infty}x_{\cs{}i\ce{}j}$.
 This text is not marked.
-Currently there are problens with some special characters.
 
 \noindent
 \begin{minipage}[b]{0.4\textwidth}

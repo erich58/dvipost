@@ -90,6 +90,7 @@ static void dbg_beg (DviFile *df)
 {
 	if	(dbg_pos)
 		putc('\n', stderr);
+
 	dbg_pos = (verboselevel >= STAT) ? df->pos : 0;
 }
 
@@ -117,7 +118,7 @@ static char *tab2[] = {
 
 static void dbg_type (DviToken *token)
 {
-	if	(!(token && dbg_pos))
+	if	(dbg_pos == 0)
 		return;
 
 	fprintf(stderr, "%d: ", dbg_pos);
@@ -160,8 +161,8 @@ typedef struct {
 	void (*eval) (void *par, const char *arg);
 } PostCmd;
 
+static int thickness = 0;
 static int cbrule = 0;
-static int offset = 0;
 static int cbmode = 0;
 static int textwidth = 0;
 static int textheight = 0;
@@ -172,6 +173,7 @@ static int headheight = 0;
 static int headsep = 0;
 static int footskip = 0;
 static int showlayout = 0;
+static int cbframe = 0;
 static char *pre = NULL;
 static char *post = NULL;
 
@@ -213,8 +215,9 @@ static PostCmd cmd_tab[] = {
 	{ "headsep", &headsep, set_length },
 	{ "footskip", &footskip, set_length },
 	{ "showlayout", &showlayout, set_flag },
+	{ "cbframe", &cbframe, set_flag },
+	{ "thickness", &thickness, set_length },
 	{ "cbrule", &cbrule, set_length },
-	{ "offset", &offset, set_length },
 	{ "cbmode", &cbmode, set_depth },
 	{ "pre", &pre, set_string },
 	{ "post", &post, set_string },
@@ -278,7 +281,7 @@ static int postcmd (char *cmd)
 
 DviToken tok_buf;
 
-static void dout_goto (DviFile *out, int v, int h)
+static void cmd_goto (DviFile *out, int v, int h)
 {
 	dout_down(out, v - dvi_stat.v);
 	dvi_stat.v = v;
@@ -286,7 +289,7 @@ static void dout_goto (DviFile *out, int v, int h)
 	dvi_stat.h = h;
 }
 
-static void dout_move (DviFile *out, int v, int h)
+static void cmd_move (DviFile *out, int v, int h)
 {
 	dout_down(out, v);
 	dvi_stat.v += v;
@@ -299,33 +302,44 @@ static void endpage (DviFile *out)
 	if	(showlayout)
 	{
 		int footheight;
+		int margin;
+		int n;
 
+		margin = oddsidemargin;
 		dout_special(out, pre);
-		dout_goto(out, topmargin, oddsidemargin);
-		dout_putrule(out, cbrule, textwidth);
-		dout_move(out, headheight, 0);
-		dout_putrule(out, headheight, cbrule);
-		dout_setrule(out, cbrule, textwidth);
-		dout_putrule(out, headheight, cbrule);
+		cmd_goto(out, 0, 0);
+		dout_putrule(out, thickness, margin + textwidth);
+		n = topmargin + headheight + headsep + textheight + footskip;
+		cmd_move(out, n, 0);
+		dout_putrule(out, n, thickness);
 
-		dout_move(out, headsep, -textwidth);
-		dout_putrule(out, cbrule, textwidth);
-		dout_move(out, textheight, 0);
-		dout_putrule(out, textheight, cbrule);
-		dout_setrule(out, cbrule, textwidth);
-		dout_putrule(out, textheight, cbrule);
+		cmd_goto(out, topmargin, margin);
+		dout_putrule(out, thickness, textwidth);
+		cmd_move(out, headheight, 0);
+		dout_putrule(out, headheight, thickness);
+		dout_setrule(out, thickness, textwidth);
+		dvi_stat.h += textwidth;
+		dout_putrule(out, headheight, thickness);
+		cmd_move(out, headsep, -textwidth);
+		dout_putrule(out, thickness, textwidth);
+		cmd_move(out, textheight, 0);
+		dout_putrule(out, textheight, thickness);
+		dout_setrule(out, thickness, textwidth);
+		dvi_stat.h += textwidth;
+		dout_putrule(out, textheight, thickness);
 
 		footheight = headheight;
 
 		if	(footheight > footskip)
 			footheight = footskip;
 
-		dout_move(out, footskip - footheight, -textwidth);
-		dout_putrule(out, cbrule, textwidth);
-		dout_move(out, footheight, 0);
-		dout_putrule(out, footheight, cbrule);
-		dout_setrule(out, cbrule, textwidth);
-		dout_putrule(out, footheight, cbrule);
+		cmd_move(out, footskip - footheight, -textwidth);
+		dout_putrule(out, thickness, textwidth);
+		cmd_move(out, footheight, 0);
+		dout_putrule(out, footheight, thickness);
+		dout_setrule(out, thickness, textwidth);
+		dvi_stat.h += textwidth;
+		dout_putrule(out, footheight, thickness);
 
 		dout_special(out, post);
 	}
@@ -341,17 +355,97 @@ static void mv_right(int val)
 	dbg(("=%d ", dvi_stat.h));
 }
 
-static void setchar (DviFile *out, int c)
+static int text_hpos = 0;	/* number of text characters past */
+static int text_cnt = 0;	/* number of text characters past */
+static int text_height = 0;	/* last character height */
+static int text_depth = 0;	/* last character depth */
+
+static double acc_height = 0.;	/* accumulated width weighted height */
+static double acc_depth = 0.;	/* accumulated width weighted depth */
+static double acc_width = 0.;	/* accumulated width */
+
+static void text_beg (DviFile *out)
 {
-	int width = dvi_font->width[c];
-	mv_right(width);
+	if	(text_cnt)	return;
+
+	text_hpos = dvi_stat.h;
+	return;
+}
+
+static void text_end (DviFile *out)
+{
+	if	(!text_cnt)	return;
+
+	text_cnt = 0;
 
 	if	(cbmode)
 	{
 		dout_special(out, pre);
-		dout_move(out, -offset, -width);
-		dout_setrule(out, cbrule, width);
-		dout_move(out, offset, 0);
+
+		if	(cbframe)
+		{
+			dout_down(out, text_depth);
+			dout_putrule(out, text_depth + text_height, thickness);
+			dout_down(out, -text_depth);
+		}
+
+		{
+			int l, o;
+			double x;
+			
+			l = dvi_stat.h - text_hpos;
+			dbg(("[l=%d] ", l));
+			x = (acc_height - acc_depth) / acc_width;
+			o = 0.5 * (1. - thickness + x);
+
+			dout_down(out, -o);
+			dout_right(out, -l);
+			dout_setrule(out, thickness, l);
+			dout_down(out, o);
+		}
+
+		dout_special(out, post);
+	}
+
+	text_height = 0;
+	text_depth = 0;
+	acc_height = 0.;
+	acc_depth = 0.;
+	acc_width = 0.;
+}
+
+static void setchar (DviFile *out, int c)
+{
+	int w, mh, md;
+	
+	w = dvi_font->width[c];
+	mh = text_height;
+	md = text_depth;
+	text_height = dvi_font->height[c];
+	text_depth = dvi_font->depth[c];
+	acc_width += w;
+	acc_height += w * (double) text_height;
+	acc_depth += w * (double) text_depth;
+
+	if	(mh < text_height)	mh = text_height;
+	if	(md < text_depth)	md = text_depth;
+
+	mv_right(w);
+	text_cnt++;
+
+	if	(!cbmode)	return;
+
+	if	(cbframe)
+	{
+		dout_special(out, pre);
+		dout_right(out, -w);
+		dout_down(out, md);
+		dout_putrule(out, md + mh, thickness);
+		dout_down(out, text_depth - md);
+		dout_putrule(out, thickness, w);
+		dout_down(out, -text_height - text_depth);
+		dout_setrule(out, thickness, w);
+		dout_down(out, text_height);
 		dout_special(out, post);
 	}
 }
@@ -373,9 +467,23 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 	{
 		dbg_beg(df);
 		token = din_token(df);
+
+		if	(token == NULL)
+		{
+			text_end(out);
+			break;
+		}
+
 		dbg_type(token);
 
-		if	(token == NULL)	break;
+		if	(token->type <= DVI_SETC_127)
+		{
+			text_beg(out);
+			dout_token(out, token);
+			setchar(out, token->type);
+			dbg_end();
+			continue;
+		}
 
 		switch (token->type)
 		{
@@ -383,9 +491,38 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 		case DVI_SET2:
 		case DVI_SET3:
 		case DVI_SET4:
+			text_beg(out);
 			dout_token(out, token);
-			setchar(out, token->par[0] &0xff);
+			setchar(out, token->par[0] & 0xff);
+			dbg_end();
 			continue;
+		case DVI_RIGHT1:
+		case DVI_RIGHT2:
+		case DVI_RIGHT3:
+		case DVI_RIGHT4:
+			dbg(("%d ", token->par[0]));
+			dout_token(out, token);
+			mv_right(token->par[0]);
+			continue;
+		case DVI_W1:
+		case DVI_W2:
+		case DVI_W3:
+		case DVI_W4:
+			dvi_stat.w = token->par[0];
+			/*FALLTHROUGH*/
+		case DVI_W0:
+			dbg(("%d ", dvi_stat.w));
+			dout_token(out, token);
+			mv_right(dvi_stat.w);
+			continue;
+		default:
+			break;
+		}
+
+		text_end(out);
+
+		switch (token->type)
+		{
 		case DVI_SET_RULE:
 			dbg(("height %d, width %d \n ",
 				token->par[0], token->par[1]));
@@ -399,23 +536,6 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 				dvi_stat.v, token->par[0]));
 			dvi_stat.v += token->par[0];
 			dbg(("=%d ", dvi_stat.v));
-			break;
-		case DVI_RIGHT1:
-		case DVI_RIGHT2:
-		case DVI_RIGHT3:
-		case DVI_RIGHT4:
-			dbg(("%d ", token->par[0]));
-			mv_right(token->par[0]);
-			break;
-		case DVI_W1:
-		case DVI_W2:
-		case DVI_W3:
-		case DVI_W4:
-			dvi_stat.w = token->par[0];
-			/*FALLTHROUGH*/
-		case DVI_W0:
-			dbg(("%d ", dvi_stat.w));
-			mv_right(dvi_stat.w);
 			break;
 		case DVI_X1:
 		case DVI_X2:
@@ -477,13 +597,7 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 			df_fatal(df, "POST_POST without PRE.");
 			break;
 		default:
-			if	(token->type <= DVI_SETC_127)
-			{
-				dout_token(out, token);
-				setchar(out, token->par[0] &0xff);
-				continue;
-			}
-			else if	(token->type < DVI_FONT_00)
+			if	(token->type < DVI_FONT_00)
 			{
 				;
 			}
