@@ -21,6 +21,8 @@ If not, write to the Free Software Foundation, Inc.,
 #ifndef	dvipost_h
 #define	dvipost_h	1
 
+#define	_XOPEN_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
