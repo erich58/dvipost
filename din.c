@@ -177,7 +177,7 @@ DviToken *din_token (DviFile *df)
 	case DVI_FNT_DEF3:
 	case DVI_FNT_DEF4:
 		token.par[0] = din_unsigned(df, 1 + token.type - DVI_FNT_DEF1);
-		token.par[1] = din_unsigned(df, 4);
+		token.par[1] = din_signed(df, 4);
 		token.par[2] = din_signed(df, 4);
 		token.par[3] = din_signed(df, 4);
 		token.par[4] = din_byte(df);
