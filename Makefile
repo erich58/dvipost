@@ -2,7 +2,7 @@ CFLAGS=	-g -Wall -Wmissing-prototypes -D_POSIX_SOURCE
 
 all:: ltxpost ctags
 
-HDR=	ltxpost.h dvi.h
+HDR=	ltxpost.h dvi.h dvicmd.h
 OBJ=	ltxpost.o message.o pdf.o dvifile.o dvi.o
 
 $(OBJ): $(HDR)
