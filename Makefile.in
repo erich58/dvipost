@@ -43,7 +43,7 @@ FILES=	dvipost.sty
 
 # generating rules
 
-all:: $(NAME) $(ALIAS) tags
+all:: $(NAME) $(ALIAS)
 
 #	basic functions
 
@@ -129,6 +129,8 @@ clean:: purge
 # rules for ctags file
 
 SRC=	main.c $(HDR) $(BASE) $(DVIHDR) $(DVI)
+
+all:: tags
 
 tags: $(SRC)
 	ctags $(SRC)
