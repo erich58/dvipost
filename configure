@@ -880,16 +880,16 @@ fi
 
 
 
-echo $ac_n "checking if latex accepts options""... $ac_c" 1>&6
-echo "configure:885: checking if latex accepts options" >&5
+echo $ac_n "checking if tex accepts options""... $ac_c" 1>&6
+echo "configure:885: checking if tex accepts options" >&5
 
 if
-	latex -version < /dev/null > /dev/null
+	tex -version < /dev/null > /dev/null
 then
 	texflag=""
 	echo "$ac_t"""yes"" 1>&6
 else
-	texflag="-DLATEX_NO_OPTION"
+	texflag="-DTEX_WITHOUT_OPTIONS"
 	echo "$ac_t"""no"" 1>&6
 fi
 
