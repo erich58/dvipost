@@ -96,7 +96,7 @@ install::
 uninstall::
 	for p in $(FILES); do rm -f $(LATEX)/$$p; done
 
-distclean:
+distclean:: clean
 	rm -f config.cache config.log config.status Makefile
 
 # rebuild rules
