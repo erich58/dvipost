@@ -51,10 +51,13 @@ char *din_string (DviFile *df, char *tg, unsigned len)
 	static char buf[256];
 	int n;
 
-	if	(len > 255)
-		df_fatal(df, "can't read string of size %d", len);
+	if	(tg == 0)
+	{
+		if	(len > 255)
+			df_fatal(df, "can't read string of size %d", len);
 
-	if	(tg == NULL)	tg = buf;
+		tg = buf;
+	}
 
 	for (n = 0; df->ok && len-- > 0; n++)
 		tg[n] = din_byte(df);
