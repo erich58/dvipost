@@ -1,4 +1,4 @@
-CFLAGS=	-g -Wall -Wmissing-prototypes -D_POSIX_SOURCE
+CFLAGS=	-g -Wall -Wmissing-prototypes -D_XOPEN_SOURCE
 
 all:: ltxpost tags
 
@@ -13,8 +13,8 @@ clean::; rm -f $(BASE:.c=.o)
 
 #	dvi specific functions
 
-DVIHDR=	dvi.h dvicmd.h
-DVI=	dvifile.c din.c dout.c dvifont.c dvi.c 
+DVIHDR=	dvi.h dvicmd.h tfm.h
+DVI=	dvifile.c din.c dout.c dvifont.c dvi.c tfm.c
 
 $(DVI:.c=.o): $(HDR) $(DVIHDR)
 
@@ -37,7 +37,7 @@ clean::; rm -f ltxpost.o
 
 OBJ=	ltxpost.o $(BASE:.c=.o) $(DVI:.c=.o) $(PDF:.c=.o)
 
-ltxpost: $(OBJ); $(CC) -o $@ $(OBJ)
+ltxpost: $(OBJ); $(CC) $(CFLAGS) -o $@ $(OBJ)
 
 clean::; rm -f ltxpost
 

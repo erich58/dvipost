@@ -7,6 +7,7 @@
 #define	dvi_h	1
 
 #include <stdio.h>
+#include "tfm.h"
 #include "dvicmd.h"
 
 typedef struct {
@@ -52,6 +53,7 @@ void dout_token (DviFile *df, DviToken *token);
 
 typedef struct {
 	DviToken token;	/* font def token */
+	TFM tfm;	/* font metric data */
 } DviFont;
 
 extern DviFont *DviFontTab;
@@ -87,11 +89,10 @@ typedef struct {
 	int den;	/* denominator of units fraction */
 	int mag;	/* magnification */
 	double true_conv;
-	double tfm_conv;
 	double conv;	
 } DviUnit;
 
+extern double tfm_conv;
 extern DviUnit dvi_unit;
-
 
 #endif	/* dvi.h */

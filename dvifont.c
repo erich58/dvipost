@@ -36,18 +36,15 @@ DviFont *DviFont_get (int font)
 	return NULL;
 }
 
+
 void DviFont_add (DviToken *token)
 {
 	DviFont *fp;
 
-	message(STAT, "Font %d: %s", token->par[0], token->str);
 	fp = DviFont_get (token->par[0]);
 
 	if	(fp)
-	{
-		message(STAT, "---this font was already defined!\n");
 		return;
-	}
 
 	if	(DviFontDim >= size)
 	{
@@ -60,7 +57,10 @@ void DviFont_add (DviToken *token)
 
 	fp = DviFontTab + DviFontDim++;
 	fp->token = *token;
-	
+	tfm_load(&fp->tfm, token->str);
+
+	message(STAT, "Font %d: %s", token->par[0], token->str);
+
 	if	(SCALE(fp) > 0 && DSIZE(fp) > 0)
 	{
 		int m = (1000. * dvi_unit.conv * SCALE(fp)) /
@@ -70,6 +70,11 @@ void DviFont_add (DviToken *token)
 			message(STAT, " scaled %d", m);
 	}
 
-	message(STAT, "\n");
+	message(STAT, "---loaded at size %d DVI units \n", SCALE(fp));
+
+	if	(fp->tfm.dsize && SCALE(fp) != fp->tfm.dsize)
+		message(STAT, " (this font is magnified %.0f%%) \n",
+			100. * SCALE(fp) / fp->tfm.dsize);
+
 	qsort(DviFontTab, DviFontDim, sizeof(DviFont), cmp_font);
 }
