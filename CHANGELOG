@@ -1,12 +1,6 @@
 Version 0.9:
 
-Added autoconf script to create Makefile. To make dvipost,
-do the following:
-
-configure	# create Makefile
-make		# create binaries
-make test	# run test (optional)
-make install	# install binaries and styles (may need root privileges)
+Added autoconf script to create Makefile.
 
 Support for interactive running (la)tex: Run dvipost
 on all *.dvi files which are changed after running (la)tex.
