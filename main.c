@@ -1,6 +1,6 @@
 /*	LaTeX - Postfilter
 
-$Copyright (C) 2002 Erich Frühstück
+$Copyright (C) 2002 Erich Fruehstueck
 
 Dvipost is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public
