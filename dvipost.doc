@@ -31,9 +31,9 @@ dvipost, pptex, pplatex - post processing of DVI-Files
 
 \Description
 The command |dvipost| is a post procesor for dvi files, created by
-|latex| or |tex|. It is used for special modes, which normaly needs
+|latex| or |tex|. It is used for special modes, which normally needs
 the support of dvi drivers (such as |dvips|). With |dvipost|, this
-features could be implemented independend of the prefered driver.
+features could be implemented independent of the prefered driver.
 Currently, the post processor supports layout raster, change bars and
 overstrike mode.
 
@@ -62,7 +62,7 @@ The filter interpretes dvi extensions in the form of
 where <arg> depends on the command <name> and may be separated from
 <name> by |=|  or space.
 All other extensions are not interpreted by |dvipost| and
-remains in the dvi file.
+remain in the dvi file.
 
 Such a dvipost command could be placed with the \TeX; primitive
 	|\special{dvipost:| <cmd>|}|
@@ -75,7 +75,7 @@ the following kinds of arguments may be used:
 \ititem	length
 	is a floating point number followed by a
 	unit specification.
-	The folowing units are supportet by |divipost|:
+	The following units are supportet by |divipost|:
 	|pt|, |in|, |cm| and |mm|.
 	If no argument is given or the unit specification is missing,
 	the corresponding <length> is set to 0.
@@ -148,7 +148,7 @@ changes.
 The following \LaTeX; macros modifies the overstrike level:
 
 \ttitem	|\overstrikeon|
-	increments the ovwerstrike level.
+	increments the overstrike level.
 \ttitem	|\overstrikeoff|
 	decrements the overstrike level.
 \ttitem	|\overstrike|{<text>}
@@ -156,17 +156,17 @@ The following \LaTeX; macros modifies the overstrike level:
 
 The following |dvipost| commands are used in context of overstrike mode:
 \ttitem osmode <depth>
-	increments/Decrements the overstrike level.
+	increments/decrements the overstrike level.
 	This command is used by the \LaTeX; macros.
 \ttitem osrule <length>
 	sets the thickness of the overstrike line to <length>.
 	The default value is |\fboxrule|.
 \ttitem osstart <string>
 	places the dvi extension <string> before change
-	of overstrile mode.
+	of overstrike mode.
 \ttitem osend <string>
 	places the dvi extension <string> after change
-	of overstrile mode.
+	of overstrike mode.
 
 The use of |osstart| and |osend| is similar to |cbstart| and |cbend|.
 
@@ -196,7 +196,7 @@ Additional the flag |twoside| is set to 0 or 1, depending on
 the document style option |twoside|.
 \latex{\end{sloppypar}}
 
-Instead of calling |\dvipostlayout|, partiucular values could be set.
+Instead of calling |\dvipostlayout|, partciucular values could be set.
 The command
 	|\dvipost{evensidemargin=\the\evensidemargin}|
 transfers the actual setting of |\evensidemargin| to the
@@ -220,7 +220,7 @@ float <depth>
 \Notes
 The filter is primarly written for \LaTeX;.
 It could be used for plain \TeX;, but currently there is no
-assistance style file includedi in the distribution.
+assistance style file included in the distribution.
 Maybe somone would write one, I am not a plain \TeX; user.
 
 The current state of change bar mode and overstrike mode
@@ -229,7 +229,7 @@ locations than the current text. This is done in |dvipost.sty|
 by redefining |\color@begingroup| and |\color@endgroup|.
 This may conflict with other packages.
 
-If the macro |\footnoterule| is redefinied, it should start with
+If the macro |\footnoterule| is redefined, it should start with
 the command |\dvipost{footnote}| for a correct handling of
 overstrike mode and change bars.
 
