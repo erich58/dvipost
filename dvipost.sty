@@ -35,8 +35,8 @@
 \newif\ifdvipost@cbmode
 \dvipost@cbmodefalse
 
-\def\changestart{\dvipost@cbmodetrue \dvipost{cbmode=1}}
-\def\changeend{\dvipost{cbmode=0}\dvipost@cbmodefalse}
+\DeclareRobustCommand{\changestart}{\dvipost@cbmodetrue \dvipost{cbmode=1}}
+\DeclareRobustCommand{\changeend}{\dvipost{cbmode=0}\dvipost@cbmodefalse}
 \def\textchanged#1{\changestart #1\changeend}
 
 % macros to set overstrike mode
@@ -44,8 +44,8 @@
 \newif\ifdvipost@osmode
 \dvipost@osmodefalse
 
-\def\overstrikeon{\dvipost@osmodetrue\dvipost{osmode=1}}
-\def\overstrikeoff{\dvipost{osmode=0}\dvipost@osmodefalse}
+\DeclareRobustCommand{\overstrikeon}{\dvipost@osmodetrue\dvipost{osmode=1}}
+\DeclareRobustCommand{\overstrikeoff}{\dvipost{osmode=0}\dvipost@osmodefalse}
 \def\overstrike#1{\overstrikeon #1\overstrikeoff}
 
 % redefine \color@begingroup and \color@endgroup to
