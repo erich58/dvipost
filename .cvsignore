@@ -3,7 +3,9 @@ ltxpost
 dvipost
 pplatex
 pptex
-config.*
+config.log
+config.status
+config.cache
 *.o
 *.dvi
 *.log
