@@ -10,16 +10,11 @@
 #include "dvicmd.h"
 
 typedef struct {
-	const char *name;
-	FILE *file;
-	unsigned pos;
-	int ok;
-	int trace;
-	int num;	/* numerator of units fraction */
-	int den;	/* denominator of units fraction */
-	int mag;	/* magnification */
-	double conv;	
-	double true_conv;
+	const char *name; /* file name */
+	FILE *file;	/* file pointer */
+	unsigned pos;	/* file position */
+	int ok;		/* status flag */
+	int trace;	/* trace flag */
 	int last_page;	/* offset of last page */
 	int depth;	/* stack depth */
 	int mdepth;	/* maximum depth size */
@@ -40,7 +35,7 @@ extern void dout_signed (DviFile *df, int val, unsigned len);
 extern void dout_unsigned (DviFile *df, unsigned val, unsigned len);
 extern void dout_string (DviFile *df, char *buf, unsigned len);
 
-/*	dvi - tokens
+/*	token
 */
 
 typedef struct {
@@ -64,5 +59,39 @@ extern int DviFontDim;
 
 extern DviFont *DviFont_get (int font);
 extern void DviFont_add (DviToken *token);
+
+extern DviFont *dvi_font;
+
+/*	stack
+*/
+
+typedef struct DviStatStruct DviStat;;
+
+struct DviStatStruct {
+	DviStat *next;
+	int h;	/* horizontal coordinate */
+	int v;	/* vertical coordinate */
+	int w;	/* horizontal spacing */
+	int x;	/* horizontal spacing */
+	int y;	/* vertical spacing */
+	int z;	/* vertical spacing */
+};
+
+extern DviStat dvi_stat;
+
+/*	process state
+*/
+
+typedef struct {
+	int num;	/* numerator of units fraction */
+	int den;	/* denominator of units fraction */
+	int mag;	/* magnification */
+	double true_conv;
+	double tfm_conv;
+	double conv;	
+} DviUnit;
+
+extern DviUnit dvi_unit;
+
 
 #endif	/* dvi.h */

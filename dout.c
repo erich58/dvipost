@@ -161,22 +161,19 @@ void dout_token (DviFile *df, DviToken *tok)
 		break;
 	case DVI_PRE:
 		dout_byte(df, 2);
-		df->num = tok->par[0];
-		df->den = tok->par[1];
-		df->mag = tok->par[2];
-		dout_signed(df, df->num, 4);
-		dout_signed(df, df->den, 4);
-		dout_signed(df, df->mag, 4);
+		dout_signed(df, tok->par[0], 4);
+		dout_signed(df, tok->par[1], 4);
+		dout_signed(df, tok->par[2], 4);
 		dout_byte(df, tok->par[3]);
 		dout_string(df, tok->str, tok->par[3]);
 		break;
 	case DVI_POST:
 		dout_signed(df, df->last_page, 4);
-		dout_signed(df, df->num, 4);
-		dout_signed(df, df->den, 4);
-		dout_signed(df, df->mag, 4);
 		dout_signed(df, tok->par[0], 4);
 		dout_signed(df, tok->par[1], 4);
+		dout_signed(df, tok->par[2], 4);
+		dout_signed(df, tok->par[3], 4);
+		dout_signed(df, tok->par[4], 4);
 		dout_unsigned(df, df->mdepth, 2);
 		dout_unsigned(df, df->npages, 2);
 

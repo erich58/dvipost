@@ -190,9 +190,9 @@ DviToken *din_token (DviFile *df)
 		if	(din_byte(df) != 2)
 			df_fatal(df, "Bad DVI file: id byte not 2.");
 
-		df->num = token.par[0] = din_signed(df, 4);
-		df->den = token.par[1] = din_signed(df, 4);
-		df->mag = token.par[2] = din_signed(df, 4);
+		token.par[0] = din_signed(df, 4);
+		token.par[1] = din_signed(df, 4);
+		token.par[2] = din_signed(df, 4);
 		token.par[3] = din_byte(df);
 		token.str = din_string(df, token.par[3]);
 		break;
@@ -200,13 +200,13 @@ DviToken *din_token (DviFile *df)
 		if	(din_signed(df, 4) != df->last_page)
 			df_fatal(df, "page offset error.");
 
-		din_signed(df, 4);
-		din_signed(df, 4);
-		din_signed(df, 4);
 		token.par[0] = din_signed(df, 4);
 		token.par[1] = din_signed(df, 4);
-		din_unsigned(df, 2);
-		din_unsigned(df, 2);
+		token.par[2] = din_signed(df, 4);
+		token.par[3] = din_signed(df, 4);
+		token.par[4] = din_signed(df, 4);
+		token.par[5] = din_unsigned(df, 2);
+		token.par[6] = din_unsigned(df, 2);
 		break;
 	case DVI_POST_POST:
 		token.par[0] = din_unsigned(df, 4);
