@@ -62,14 +62,3 @@ char *din_string (DviFile *df, char *tg, unsigned len)
 	tg[n] = 0;
 	return tg;
 }
-
-void din_trace (DviFile *df, const char *fmt, ...)
-{
-	if	(df->trace || verboselevel >= STAT)
-	{
-		va_list list;
-		va_start(list, fmt);
-		vfprintf(stderr, fmt, list);
-		va_end(list);
-	}
-}

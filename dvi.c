@@ -37,7 +37,7 @@ static void parse_pre (DviFile *df, FILE *out)
 	putval(out, 1, n);
 	desc = din_string(df, NULL, n);
 	fwrite(desc, 1, n, out);
-	din_trace(df, "'%s'\n", desc);
+	df_trace(df, "'%s'\n", desc);
 }
 
 static void parse_fntdef (DviFile *df, FILE *out, int n)
@@ -48,7 +48,7 @@ static void parse_fntdef (DviFile *df, FILE *out, int n)
 
 	font = din_unsigned(df, n);
 	putval(out, n, font);
-	din_trace(df, "Font %d:", font);
+	df_trace(df, "Font %d:", font);
 
 	putval(out, 4, din_unsigned(df, 4));
 	putval(out, 4, din_unsigned(df, 4));
@@ -61,9 +61,9 @@ static void parse_fntdef (DviFile *df, FILE *out, int n)
 
 	name = din_string(df, NULL, a + l);
 	fwrite(name, 1, a + l, out);
-	din_trace(df, " %s", name);
+	df_trace(df, " %s", name);
 
-	din_trace(df, "\n");
+	df_trace(df, "\n");
 }
 
 static int parse_post(DviFile *df, FILE *out)
@@ -72,7 +72,7 @@ static int parse_post(DviFile *df, FILE *out)
 	unsigned start;
 
 	start = df->pos - 1;
-	din_trace(df, "Postamble starts at byte %d.\n", start);
+	df_trace(df, "Postamble starts at byte %d.\n", start);
 	putval(out, 4, din_unsigned(df, 4));
 	putval(out, 4, din_unsigned(df, 4));
 	putval(out, 4, din_unsigned(df, 4));
@@ -191,7 +191,7 @@ int process_dvi (const char *id, FILE *in, FILE *out)
 		case DVI_BOP:	/* beginning of page */
 			par = din_unsigned(df, 4);
 			putval(out, 4, par);
-			din_trace(df, "%d: beginning of page %d\n",
+			df_trace(df, "%d: beginning of page %d\n",
 				df->pos - 1, par);
 			putval(out, 4, din_unsigned(df, 4));
 			putval(out, 4, din_unsigned(df, 4));
@@ -206,13 +206,13 @@ int process_dvi (const char *id, FILE *in, FILE *out)
 			putval(out, 4, din_unsigned(df, 4));
 			break;
 		case DVI_EOP:	/* ending of page */
-			din_trace(df, "%d: eop\n", df->pos - 1);
+			df_trace(df, "%d: eop\n", df->pos - 1);
 			break;
 		case DVI_PUSH:	/* save the current positions */
-			din_trace(df, "%d: push\n", df->pos - 1);
+			df_trace(df, "%d: push\n", df->pos - 1);
 			break;
 		case DVI_POP:	/* restore previous positions */
-			din_trace(df, "%d: pop\n", df->pos - 1);
+			df_trace(df, "%d: pop\n", df->pos - 1);
 			break;
 		case DVI_RIGHT1:	/* move right */
 			putval(out, 1, din_unsigned(df, 1));

@@ -19,12 +19,12 @@ typedef struct {
 
 extern DviFile *df_init (DviFile *buf, const char *name, FILE *file);
 extern void df_fatal (DviFile *df, const char *fmt, ...);
+extern void df_trace (DviFile *df, const char *fmt, ...);
 
 extern int din_byte (DviFile *df);
 extern int din_signed (DviFile *df, unsigned len);
 extern int din_unsigned (DviFile *df, unsigned len);
 extern char *din_string (DviFile *df, char *buf, unsigned len);
-extern void din_trace (DviFile *df, const char *fmt, ...);
 
 extern void dout_byte (DviFile *df, int val);
 extern void dout_signed (DviFile *df, int val, unsigned len);
