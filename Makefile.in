@@ -96,7 +96,7 @@ install-exec: uninstall-exec
 	(cd $(BIN); for p in $(ALIAS); do rm -f $$p; $(LN) $(NAME) $$p; done)
 
 uninstall-man:
-	for p in $(NAME) $(ALIAS); do rm -f $(MANIR)/$$p.$(MANEXT); done
+	for p in $(NAME) $(ALIAS); do rm -f $(MANDIR)/$$p.$(MANEXT); done
 
 install-man: uninstall-man
 	$(INSTALL_DATA) dvipost.man $(MANDIR)/$(NAME).$(MANEXT)
