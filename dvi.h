@@ -70,7 +70,18 @@
 #define	DVI_POST           248	/* postamble beginning */
 #define	DVI_POST_POST      249	/* postamble ending */
 
-/*	undefined_commands: 250,251,252,253,254,255
-*/
+typedef struct {
+	const char *name;
+	FILE *file;
+	unsigned pos;
+	int ok;
+} DVIFile;
+
+void df_init (DVIFile *df, const char *name, FILE *file);
+void df_fatal (DVIFile *df, const char *fmt, ...);
+int df_byte (DVIFile *df);
+int df_signed (DVIFile *df, unsigned len);
+int df_unsigned (DVIFile *df, unsigned len);
+char *df_string (DVIFile *df, unsigned len);
 
 #endif	/* dvi.h */

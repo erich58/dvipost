@@ -2,7 +2,7 @@ CFLAGS=	-g -Wall -Wmissing-prototypes -D_POSIX_SOURCE
 
 all:: ltxpost
 
-OBJ=	ltxpost.o message.o pdf.o dvi.o
+OBJ=	ltxpost.o message.o pdf.o dvifile.o dvi.o
 
 $(OBJ): ltxpost.h dvi.h
 
