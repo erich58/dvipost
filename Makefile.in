@@ -92,14 +92,14 @@ clean::; rm -f tags
 # install style files
 
 install::
-	$(INSTALL_DATA) $(BIN) $(NAME)
+	$(INSTALL_DATA) $(NAME) $(BIN)/$(NAME)
 	(cd $(BIN); for p in $(ALIAS); do $(LN) $(NAME) $$p; done)
 
 uninstall::
 	for p in $(NAME) $(ALIAS); do rm -f $(BIN)/$$p; done
 
 install::
-	for p in $(FILES); do $(INSTALL_DATA) $(LATEX) $$p; done
+	for p in $(FILES); do $(INSTALL_DATA) $$p $(LATEX)/$$p; done
 	texhash
 
 uninstall::
