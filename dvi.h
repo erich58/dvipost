@@ -75,13 +75,15 @@ typedef struct {
 	FILE *file;
 	unsigned pos;
 	int ok;
+	int trace;
 } DVIFile;
 
-void df_init (DVIFile *df, const char *name, FILE *file);
-void df_fatal (DVIFile *df, const char *fmt, ...);
-int df_byte (DVIFile *df);
-int df_signed (DVIFile *df, unsigned len);
-int df_unsigned (DVIFile *df, unsigned len);
-char *df_string (DVIFile *df, unsigned len);
+extern DVIFile *df_init (DVIFile *buf, const char *name, FILE *file);
+extern void df_fatal (DVIFile *df, const char *fmt, ...);
+extern int df_byte (DVIFile *df);
+extern int df_signed (DVIFile *df, unsigned len);
+extern int df_unsigned (DVIFile *df, unsigned len);
+extern char *df_string (DVIFile *df, unsigned len);
+extern void df_trace (DVIFile *df, const char *fmt, ...);
 
 #endif	/* dvi.h */

@@ -107,6 +107,7 @@ int main (int argc, char **argv)
 */
 	message(NOTE, "$!: Process input file %s\n", iname);
 	c = getc(input);
+	ungetc(c, input);
 
 	switch (c)
 	{

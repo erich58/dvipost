@@ -5,12 +5,18 @@
 #include "dvi.h"
 #include <stdarg.h>
 
-void df_init (DVIFile *df, const char *name, FILE *file)
+DVIFile *df_init (DVIFile *df, const char *name, FILE *file)
 {
+	static DVIFile buf;
+
+	if	(df == NULL)	df = &buf;
+
+	memset(df, 0, sizeof(*df));
 	df->name = name;
 	df->file = file;
 	df->ok = 1;
 	df->pos = 0;
+	return df;
 }
 
 void df_fatal (DVIFile *df, const char *fmt, ...)
@@ -30,9 +36,9 @@ int df_byte (DVIFile *df)
 {
 	int c = getc(df->file);
 
-	if	((c = getc(df->file)) == EOF)
+	if	(c == EOF)
 	{
-		df_fatal(df, "unexpected end of file.");
+		df_fatal(df, "Unexpected end of file.");
 		return 0;
 	}
 
@@ -79,4 +85,15 @@ char *df_string (DVIFile *df, unsigned len)
 
 	buf[n] = 0;
 	return buf;
+}
+
+void df_trace (DVIFile *df, const char *fmt, ...)
+{
+	if	(df->trace || verboselevel >= STAT)
+	{
+		va_list list;
+		va_start(list, fmt);
+		vfprintf(stderr, fmt, list);
+		va_end(list);
+	}
 }
