@@ -19,25 +19,25 @@ static void parse_pre (DviInput *df, FILE *out)
 	unsigned n;
 	char *desc;
 
-	n = df_byte(df);
+	n = din_byte(df);
 	putc(n, out);
-	n = df_byte(df);
+	n = din_byte(df);
 
 	if	(n != 2)
 	{
-		df_fatal(df, "Bad DVI file: id byte not 2.");
+		din_fatal(df, "Bad DVI file: id byte not 2.");
 		return;
 	}
 
 	putval(out, 1, n);
-	putval(out, 4, df_unsigned(df, 4));
-	putval(out, 4, df_unsigned(df, 4));
-	putval(out, 4, df_unsigned(df, 4));
-	n = df_byte(df);
+	putval(out, 4, din_unsigned(df, 4));
+	putval(out, 4, din_unsigned(df, 4));
+	putval(out, 4, din_unsigned(df, 4));
+	n = din_byte(df);
 	putval(out, 1, n);
-	desc = df_string(df, NULL, n);
+	desc = din_string(df, NULL, n);
 	fwrite(desc, 1, n, out);
-	df_trace(df, "'%s'\n", desc);
+	din_trace(df, "'%s'\n", desc);
 }
 
 static void parse_fntdef (DviInput *df, FILE *out, int n)
@@ -46,24 +46,24 @@ static void parse_fntdef (DviInput *df, FILE *out, int n)
 	int a, l;
 	char *name;
 
-	font = df_unsigned(df, n);
+	font = din_unsigned(df, n);
 	putval(out, n, font);
-	df_trace(df, "Font %d:", font);
+	din_trace(df, "Font %d:", font);
 
-	putval(out, 4, df_unsigned(df, 4));
-	putval(out, 4, df_unsigned(df, 4));
-	putval(out, 4, df_unsigned(df, 4));
+	putval(out, 4, din_unsigned(df, 4));
+	putval(out, 4, din_unsigned(df, 4));
+	putval(out, 4, din_unsigned(df, 4));
 
-	a = df_unsigned(df, 1);
-	l = df_unsigned(df, 1);
+	a = din_unsigned(df, 1);
+	l = din_unsigned(df, 1);
 	putval(out, 1, a);
 	putval(out, 1, l);
 
-	name = df_string(df, NULL, a + l);
+	name = din_string(df, NULL, a + l);
 	fwrite(name, 1, a + l, out);
-	df_trace(df, " %s", name);
+	din_trace(df, " %s", name);
 
-	df_trace(df, "\n");
+	din_trace(df, "\n");
 }
 
 static int parse_post(DviInput *df, FILE *out)
@@ -72,17 +72,17 @@ static int parse_post(DviInput *df, FILE *out)
 	unsigned start;
 
 	start = df->pos - 1;
-	df_trace(df, "Postamble starts at byte %d.\n", start);
-	putval(out, 4, df_unsigned(df, 4));
-	putval(out, 4, df_unsigned(df, 4));
-	putval(out, 4, df_unsigned(df, 4));
-	putval(out, 4, df_unsigned(df, 4));
-	putval(out, 4, df_unsigned(df, 4));
-	putval(out, 4, df_unsigned(df, 4));
-	putval(out, 2, df_unsigned(df, 2));
-	putval(out, 2, df_unsigned(df, 2));
+	din_trace(df, "Postamble starts at byte %d.\n", start);
+	putval(out, 4, din_unsigned(df, 4));
+	putval(out, 4, din_unsigned(df, 4));
+	putval(out, 4, din_unsigned(df, 4));
+	putval(out, 4, din_unsigned(df, 4));
+	putval(out, 4, din_unsigned(df, 4));
+	putval(out, 4, din_unsigned(df, 4));
+	putval(out, 2, din_unsigned(df, 2));
+	putval(out, 2, din_unsigned(df, 2));
 
-	c = df_byte(df);
+	c = din_byte(df);
 
 	while (df->ok)
 	{
@@ -107,11 +107,11 @@ static int parse_post(DviInput *df, FILE *out)
 		case DVI_POST_POST:	/* postamble beginning */
 			n = df->pos - 1;
 
-			if	(df_unsigned(df, 4) != start)
-				df_fatal(df, "Incorrect start of Postamble.");
+			if	(din_unsigned(df, 4) != start)
+				din_fatal(df, "Incorrect start of Postamble.");
 
-			if	(df_byte(df) != 2)
-				df_fatal(df, "Bad Postamble: id byte not 2.");
+			if	(din_byte(df) != 2)
+				din_fatal(df, "Bad Postamble: id byte not 2.");
 
 			putval(out, 4, start);
 			putval(out, 1, 2);
@@ -124,12 +124,12 @@ static int parse_post(DviInput *df, FILE *out)
 
 			return 0;
 		default:
-			df_fatal(df, "Command %d not allowed in postamble.",
+			din_fatal(df, "Command %d not allowed in postamble.",
 				c);
 			break;
 		}
 
-		c = df_byte(df);
+		c = din_byte(df);
 	}
 
 	return 1;
@@ -143,9 +143,9 @@ int process_dvi (const char *id, FILE *in, FILE *out)
 	int post;
 	int c;
 
-	df = df_init(NULL, id, in);
+	df = din_init(NULL, id, in);
 	parse_pre(df, out);
-	c = df_byte(df);
+	c = din_byte(df);
 	post = 0;
 
 	while (df->ok)
@@ -155,168 +155,168 @@ int process_dvi (const char *id, FILE *in, FILE *out)
 		switch (c)
 		{
 		case DVI_SET1:	/* typeset a character and move right */
-			putval(out, 1, df_unsigned(df, 1));
+			putval(out, 1, din_unsigned(df, 1));
 			break;
 		case DVI_SET2:	/* ??? */
-			putval(out, 2, df_unsigned(df, 2));
+			putval(out, 2, din_unsigned(df, 2));
 			break;
 		case DVI_SET3:	/* ??? */
-			putval(out, 3, df_unsigned(df, 3));
+			putval(out, 3, din_unsigned(df, 3));
 			break;
 		case DVI_SET4:	/* ??? */
-			putval(out, 4, df_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
 			break;
 		case DVI_SET_RULE:	/* typeset a rule and move right */
-			putval(out, 4, df_unsigned(df, 4));
-			putval(out, 4, df_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
 			break;
 		case DVI_PUT1:	/* typeset a character */
-			putval(out, 1, df_unsigned(df, 1));
+			putval(out, 1, din_unsigned(df, 1));
 			break;
 		case DVI_PUT2:	/* ??? */
-			putval(out, 2, df_unsigned(df, 2));
+			putval(out, 2, din_unsigned(df, 2));
 			break;
 		case DVI_PUT3:	/* ??? */
-			putval(out, 3, df_unsigned(df, 3));
+			putval(out, 3, din_unsigned(df, 3));
 			break;
 		case DVI_PUT4:	/* ??? */
-			putval(out, 4, df_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
 			break;
 		case DVI_PUT_RULE:	/* typeset a rule */
-			putval(out, 4, df_unsigned(df, 4));
-			putval(out, 4, df_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
 			break;
 		case DVI_NOP:	/* no operation */
 			break;
 		case DVI_BOP:	/* beginning of page */
-			par = df_unsigned(df, 4);
+			par = din_unsigned(df, 4);
 			putval(out, 4, par);
-			df_trace(df, "%d: beginning of page %d\n",
+			din_trace(df, "%d: beginning of page %d\n",
 				df->pos - 1, par);
-			putval(out, 4, df_unsigned(df, 4));
-			putval(out, 4, df_unsigned(df, 4));
-			putval(out, 4, df_unsigned(df, 4));
-			putval(out, 4, df_unsigned(df, 4));
-			putval(out, 4, df_unsigned(df, 4));
-			putval(out, 4, df_unsigned(df, 4));
-			putval(out, 4, df_unsigned(df, 4));
-			putval(out, 4, df_unsigned(df, 4));
-			putval(out, 4, df_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
 
-			putval(out, 4, df_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
 			break;
 		case DVI_EOP:	/* ending of page */
-			df_trace(df, "%d: eop\n", df->pos - 1);
+			din_trace(df, "%d: eop\n", df->pos - 1);
 			break;
 		case DVI_PUSH:	/* save the current positions */
-			df_trace(df, "%d: push\n", df->pos - 1);
+			din_trace(df, "%d: push\n", df->pos - 1);
 			break;
 		case DVI_POP:	/* restore previous positions */
-			df_trace(df, "%d: pop\n", df->pos - 1);
+			din_trace(df, "%d: pop\n", df->pos - 1);
 			break;
 		case DVI_RIGHT1:	/* move right */
-			putval(out, 1, df_unsigned(df, 1));
+			putval(out, 1, din_unsigned(df, 1));
 			break;
 		case DVI_RIGHT2:	/* ??? */
-			putval(out, 2, df_unsigned(df, 2));
+			putval(out, 2, din_unsigned(df, 2));
 			break;
 		case DVI_RIGHT3:	/* ??? */
-			putval(out, 3, df_unsigned(df, 3));
+			putval(out, 3, din_unsigned(df, 3));
 			break;
 		case DVI_RIGHT4:	/* ??? */
-			putval(out, 4, df_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
 			break;
 		case DVI_W0:	/* move right by |w| */
 			break;
 		case DVI_W1:	/* move right and set |w| */
-			putval(out, 1, df_unsigned(df, 1));
+			putval(out, 1, din_unsigned(df, 1));
 			break;
 		case DVI_W2:	/* ??? */
-			putval(out, 2, df_unsigned(df, 2));
+			putval(out, 2, din_unsigned(df, 2));
 			break;
 		case DVI_W3:	/* ??? */
-			putval(out, 3, df_unsigned(df, 3));
+			putval(out, 3, din_unsigned(df, 3));
 			break;
 		case DVI_W4:	/* ??? */
-			putval(out, 4, df_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
 			break;
 		case DVI_X0:	/* move right by |x| */
 			break;
 		case DVI_X1:	/* move right and set |x| */
-			putval(out, 1, df_unsigned(df, 1));
+			putval(out, 1, din_unsigned(df, 1));
 			break;
 		case DVI_X2:	/* ??? */
-			putval(out, 2, df_unsigned(df, 2));
+			putval(out, 2, din_unsigned(df, 2));
 			break;
 		case DVI_X3:	/* ??? */
-			putval(out, 3, df_unsigned(df, 3));
+			putval(out, 3, din_unsigned(df, 3));
 			break;
 		case DVI_X4:	/* ??? */
-			putval(out, 4, df_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
 			break;
 		case DVI_DOWN1:	/* move down */
-			putval(out, 1, df_unsigned(df, 1));
+			putval(out, 1, din_unsigned(df, 1));
 			break;
 		case DVI_DOWN2:	/* ??? */
-			putval(out, 2, df_unsigned(df, 2));
+			putval(out, 2, din_unsigned(df, 2));
 			break;
 		case DVI_DOWN3:	/* ??? */
-			putval(out, 3, df_unsigned(df, 3));
+			putval(out, 3, din_unsigned(df, 3));
 			break;
 		case DVI_DOWN4:	/* ??? */
-			putval(out, 4, df_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
 			break;
 		case DVI_Y0:	/* move down by |y| */
 			break;
 		case DVI_Y1:	/* move down and set |y| */
-			putval(out, 1, df_unsigned(df, 1));
+			putval(out, 1, din_unsigned(df, 1));
 			break;
 		case DVI_Y2:	/* ??? */
-			putval(out, 2, df_unsigned(df, 2));
+			putval(out, 2, din_unsigned(df, 2));
 			break;
 		case DVI_Y3:	/* ??? */
-			putval(out, 3, df_unsigned(df, 3));
+			putval(out, 3, din_unsigned(df, 3));
 			break;
 		case DVI_Y4:	/* ??? */
-			putval(out, 4, df_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
 			break;
 		case DVI_Z0:	/* move down by |z| */
 			break;
 		case DVI_Z1:	/* move down and set |z| */
-			putval(out, 1, df_unsigned(df, 1));
+			putval(out, 1, din_unsigned(df, 1));
 			break;
 		case DVI_Z2:	/* ??? */
-			putval(out, 2, df_unsigned(df, 2));
+			putval(out, 2, din_unsigned(df, 2));
 			break;
 		case DVI_Z3:	/* ??? */
-			putval(out, 3, df_unsigned(df, 3));
+			putval(out, 3, din_unsigned(df, 3));
 			break;
 		case DVI_Z4:	/* ??? */
-			putval(out, 4, df_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
 			break;
 		case DVI_FNT1:	/* set current font */
-			putval(out, 1, df_unsigned(df, 1));
+			putval(out, 1, din_unsigned(df, 1));
 			break;
 		case DVI_FNT2:	/* Same as FNT1, except that arg is 2 bytes */
-			putval(out, 2, df_unsigned(df, 2));
+			putval(out, 2, din_unsigned(df, 2));
 			break;
 		case DVI_FNT3:	/* Same as FNT1, except that arg is 3 bytes */
-			putval(out, 3, df_unsigned(df, 3));
+			putval(out, 3, din_unsigned(df, 3));
 			break;
 		case DVI_FNT4:	/* Same as FNT1, except that arg is 4 bytes */
-			putval(out, 4, df_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
 			break;
 		case DVI_XXX1:	/* extension to \.DVI primitives */
-			putval(out, 1, df_unsigned(df, 1));
+			putval(out, 1, din_unsigned(df, 1));
 			break;
 		case DVI_XXX2:	/* Like XXX1, but 0<=k<65536 */
-			putval(out, 2, df_unsigned(df, 2));
+			putval(out, 2, din_unsigned(df, 2));
 			break;
 		case DVI_XXX3:	/* Like XXX1, but 0<=k<@t$2^{24}$@> */
-			putval(out, 3, df_unsigned(df, 3));
+			putval(out, 3, din_unsigned(df, 3));
 			break;
 		case DVI_XXX4:	/* long extension to \.DVI primitives */
-			putval(out, 4, df_unsigned(df, 4));
+			putval(out, 4, din_unsigned(df, 4));
 			break;
 		case DVI_FNT_DEF1: /* define the meaning of a font number */
 			parse_fntdef(df, out, 1);
@@ -331,12 +331,12 @@ int process_dvi (const char *id, FILE *in, FILE *out)
 			parse_fntdef(df, out, 4);
 			break;
 		case DVI_PRE:	/* preamble */
-			df_fatal(df, "PRE occures within file.");
+			din_fatal(df, "PRE occures within file.");
 			break;
 		case DVI_POST:	/* postamble beginning */
 			return parse_post(df, out);
 		case DVI_POST_POST: /* postamble ending */
-			df_fatal(df, "POST_POST without PRE.");
+			din_fatal(df, "POST_POST without PRE.");
 			break;
 		default:
 
@@ -348,12 +348,12 @@ int process_dvi (const char *id, FILE *in, FILE *out)
 			{
 				;
 			}
-			else	df_fatal(df, "undefined command %d.", c);
+			else	din_fatal(df, "undefined command %d.", c);
 
 			break;
 		}
 
-		c = df_byte(df);
+		c = din_byte(df);
 	}
 
 	return 1;

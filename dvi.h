@@ -17,12 +17,12 @@ typedef struct {
 	int trace;
 } DviInput;
 
-extern DviInput *df_init (DviInput *buf, const char *name, FILE *file);
-extern void df_fatal (DviInput *df, const char *fmt, ...);
-extern int df_byte (DviInput *df);
-extern int df_signed (DviInput *df, unsigned len);
-extern int df_unsigned (DviInput *df, unsigned len);
-extern char *df_string (DviInput *df, char *buf, unsigned len);
-extern void df_trace (DviInput *df, const char *fmt, ...);
+extern DviInput *din_init (DviInput *buf, const char *name, FILE *file);
+extern void din_fatal (DviInput *df, const char *fmt, ...);
+extern int din_byte (DviInput *df);
+extern int din_signed (DviInput *df, unsigned len);
+extern int din_unsigned (DviInput *df, unsigned len);
+extern char *din_string (DviInput *df, char *buf, unsigned len);
+extern void din_trace (DviInput *df, const char *fmt, ...);
 
 #endif	/* dvi.h */
