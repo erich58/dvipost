@@ -1,7 +1,7 @@
 Makefile
 ltxpost
 dvipost
-dvipost.1
+dvipost.man
 dvipost.tex
 pplatex
 pptex
