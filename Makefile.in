@@ -31,8 +31,8 @@ LATEX=	@texpath@
 
 # Install names
 
-NAME=	$(BIN)/dvipost
-ALIAS=	$(BIN)/pptex $(BIN)/pplatex $(BIN)/ltxpost
+NAME=	dvipost
+ALIAS=	pptex pplatex ltxpost
 FILES=	$(LATEX)/dvipost.sty
 
 ### End of configuration part ###
