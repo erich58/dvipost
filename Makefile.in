@@ -23,6 +23,10 @@ CC=	@CC@
 CFLAGS=	@CFLAGS@ @kpseflag@
 LN=	@LN_S@
 
+INSTALL=	@INSTALL@
+INSTALL_PROGRAM= @INSTALL_PROGRAM@
+INSTALL_DATA= @INSTALL_DATA@
+
 BIN=	@bindir@
 
 # Directory to install LaTeX styles
@@ -33,7 +37,7 @@ LATEX=	@texpath@
 
 NAME=	dvipost
 ALIAS=	pptex pplatex ltxpost
-FILES=	$(LATEX)/dvipost.sty
+FILES=	dvipost.sty
 
 ### End of configuration part ###
 
@@ -87,15 +91,19 @@ clean::; rm -f tags
 
 # install style files
 
-install:: $(LATEX) $(FILES)
+install::
+	$(INSTALL_DATA) $(BIN) $(NAME)
+	(cd $(BIN); for p in $(ALIAS); do $(LN) $(NAME) $$p; done)
 
-$(LATEX):; mkdir -p $@
+uninstall::
+	for p in $(NAME) $(ALIAS); do rm -f $(BIN)/$$p; done
 
-$(LATEX)/dvipost.sty: dvipost.sty
-	cp dvipost.sty $@
+install::
+	for p in $(FILES); do $(INSTALL_DATA) $(LATEX) $$p; done
+	texhash
 
-uninstall::; rm -f $(FILES)
-uninstall::; -rmdir -p $(LATEX)
+uninstall::
+	for p in $(FILES); do rm -f $(LATEX)/$$p; done
 
 #	run test
 
