@@ -82,19 +82,23 @@ clean::; rm -f $(ALIAS)
 
 # install style files
 
-install::
-	$(INSTALL_DATA) $(NAME) $(BIN)/$(NAME)
-	(cd $(BIN); for p in $(ALIAS); do $(LN) $(NAME) $$p; done)
+install: install-exec install-data
+uninstall: uninstall-exec uninstall-data
 
-uninstall::
+uninstall-exec:
 	for p in $(NAME) $(ALIAS); do rm -f $(BIN)/$$p; done
 
-install::
-	for p in $(FILES); do $(INSTALL_DATA) $$p $(LATEX)/$$p; done
+install-exec: uninstall-exec
+	$(INSTALL_DATA) $(NAME) $(BIN)/$(NAME)
+	(cd $(BIN); for p in $(ALIAS); do rm -f $$p; $(LN) $(NAME) $$p; done)
+
+uninstall-data:
+	for p in $(FILES); do rm -f $(LATEX)/$$p; done
 	texhash
 
-uninstall::
-	for p in $(FILES); do rm -f $(LATEX)/$$p; done
+install-data: uninstall-data
+	for p in $(FILES); do $(INSTALL_DATA) $$p $(LATEX)/$$p; done
+	texhash
 
 distclean:: clean
 	rm -f config.cache config.log config.status Makefile
