@@ -19,9 +19,9 @@ If not, write to the Free Software Foundation, Inc.,
 */
 
 #ifdef	TEX_WITHOUT_OPTIONS
-#define	TEX_ACCEPTS_OPTIONS	1
+#define	TEX_ACCEPT_OPTIONS	0
 #else
-#define	TEX_ACCEPTS_OPTIONS
+#define	TEX_ACCEPT_OPTIONS	1
 #endif
 
 static char *version = "dvipost version 0.8\n\
@@ -135,7 +135,7 @@ static int pptex_help (char **argv, char *oarg)
 
 	printf("Run %s and process DVI file with dvipost.\n",
 		tex_argv[0]);
-	printf("The following options are interpreted by %s:\n", pname);
+	printf("The following options are interpreted by %s:\n\n", pname);
 
 	for (odef = pptex_odef; odef->name; odef++)
 	{
@@ -278,7 +278,15 @@ int main (int argc, char **argv)
 	if	(pname == NULL)	pname = argv[0];
 	else			pname++;
 
-	if	(pname[0] != 'p' || pname[1] != 'p')
+	if	(strcmp(pname, "pplatex") == 0)
+	{
+		tex_argv[0] = "latex";
+	}
+	else if	(strcmp(pname, "pptex") == 0)
+	{
+		tex_argv[0] = "tex";
+	}
+	else
 	{
 		for (i = 1; i < argc; )
 		{
@@ -309,7 +317,6 @@ int main (int argc, char **argv)
 		return dvipost(tex_argv[1], tex_argv[2]);
 	}
 
-	tex_argv[0] = pname + 2;
 	flag = 1;
 	dviname = NULL;
 	optend = 0;
