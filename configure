@@ -880,6 +880,19 @@ fi
 
 
 
+echo $ac_n "checking if latex accepts options""... $ac_c" 1>&6
+echo "configure:885: checking if latex accepts options" >&5
+if	latex -version < /dev/null > /dev/null
+then	texflag=""
+else	texflag="-DXXX"
+fi
+
+if	test "$texflag" = ""
+then	echo "$ac_t"""yes"" 1>&6
+else	echo "$ac_t""no" 1>&6
+fi
+
+
 trap '' 1 2 15
 cat > confcache <<\EOF
 # This file is a shell script that caches the results of configure
@@ -1032,6 +1045,7 @@ s%@INSTALL_DATA@%$INSTALL_DATA%g
 s%@LN_S@%$LN_S%g
 s%@kpseflag@%$kpseflag%g
 s%@texpath@%$texpath%g
+s%@texflag@%$texflag%g
 
 CEOF
 EOF
