@@ -889,7 +889,7 @@ then
 	texflag=""
 	echo "$ac_t"""yes"" 1>&6
 else
-	texflag="-DLATEX_NOOPT"
+	texflag="-DLATEX_NO_OPTION"
 	echo "$ac_t"""no"" 1>&6
 fi
 

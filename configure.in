@@ -38,15 +38,15 @@ fi
 AC_SUBST(texpath)
 AC_SUBST(kpseflag)
 
-AC_MSG_CHECKING(if latex accepts options)
+AC_MSG_CHECKING(if tex accepts options)
 
 if
-	latex -version < /dev/null > /dev/null
+	tex -version < /dev/null > /dev/null
 then
 	texflag=""
 	AC_MSG_RESULT("yes")
 else
-	texflag="-DLATEX_NOOPT"
+	texflag="-DTEX_WITHOUT_OPTIONS"
 	AC_MSG_RESULT("no")
 fi
 
