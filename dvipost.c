@@ -12,111 +12,166 @@
 extern int optind;
 extern char *optarg;
 
-int verbose = 0;
+char *pname = "DVIPost";
 
-static void usage (const char *name)
+static void usage (int flag)
 {
-	fprintf(stderr, "usage: %s [-v] input [output]\n", name);
+	fprintf(stderr, "usage: %s [-hqv] input [output]\n", pname);
+
+	if	(flag > 0)
+	{
+		fputs("\t-h this output.\n", stderr);
+		fputs("\t-q be quiet, report only errors.\n", stderr);
+		fputs("\t-v increase verbose level.\n", stderr);
+	}
+
+	exit(flag >= 0 ? EXIT_SUCCESS : EXIT_FAILURE);
 }
+
 
 int main (int argc, char **argv)
 {
-	FILE *input, *output;
+	char *iname, *oname;
+	FILE *input, *tmp, *output;
 	int opt;
 	int c;
 	int stat;
 
-	while ((opt = getopt(argc, argv, "v")) != -1)
+/*	parse optionms and args
+*/
+	pname = argv[0];
+
+	while ((opt = getopt(argc, argv, "hqv")) != -1)
 	{
 		switch (opt)
 		{
+		case 'h':
+			usage(1);
+			break;
+		case 'q':
+			verboselevel = 0;
+			break;
 		case 'v':
-			verbose++;
+			verboselevel++;
 			break;
 		default:
-			return EXIT_FAILURE;
+			usage(-1);
+			break;
 		}
 	}
 
 	if	(optind == argc)
-	{
-		usage(argv[0]);
-		return EXIT_SUCCESS;
-	}
+		usage(-1);
+
+	iname = (optind < argc) ? argv[optind++] : NULL;
+	oname = (optind < argc) ? argv[optind++] : NULL;
 
 	if	(optind < argc)
+		usage(0);
+
+	message(NOTE, "This is DVIPost, Version $Id$.\n");
+
+/*	open temporary file
+*/
+	tmp = tmpfile();
+
+	if	(!tmp)
 	{
-		if	(strcmp(argv[optind], "-") != 0)
+		perror(pname);
+		exit(EXIT_FAILURE);
+	}
+
+/*	open input file
+*/
+	if	(strcmp(iname, "-") != 0)
+	{
+		input = fopen(iname, "rb");
+
+		if	(!input)
 		{
-			input = fopen(argv[optind], "rb");
-
-			if	(!input)
-			{
-				fprintf(stderr, "%s: file %s not found.\n",
-					argv[0], argv[optind]);
-				return EXIT_FAILURE;
-			}
+			fprintf(stderr, "%s: ", pname);
+			perror(iname);
+			fclose(tmp);
+			return EXIT_FAILURE;
 		}
-		else	input = stdin;
-
-		optind++;
 	}
-
-	if	(optind < argc)
+	else
 	{
-		if	(strcmp(argv[optind], "-") != 0)
-		{
-			output = fopen(argv[optind], "wb");
-
-			if	(!output)
-			{
-				fprintf(stderr, "%s: file %s not found.\n",
-					argv[0], argv[optind]);
-				fclose(input);
-				return EXIT_FAILURE;
-			}
-		}
-		else	output = stdout;
-
-		optind++;
-	}
-	else	output = stdout;
-
-	if	(optind < argc)
-	{
-		usage(argv[0]);
-		return EXIT_FAILURE;
+		iname = "<stdin>";
+		input = stdin;
 	}
 
-	stat = EXIT_SUCCESS;
+/*	check magic and process input
+*/
+	message(NOTE, "%s: Process input file %s\n", pname, iname);
 	c = getc(input);
 
 	switch (c)
 	{
 	case DVI_PRE:
-
-		c = getc(input);
-
-		if	(c == 2)
-		{
-			putc(DVI_PRE, output);
-			putc(c, output);
-
-			while ((c = getc(input)) != EOF)
-				putc(c, output);
-		}
-		else
-		{
-			stat = EXIT_FAILURE;
-		}
-
+		stat = process_dvi(input, tmp);
+		break;
+	case '%':
+		stat = process_pdf(input, tmp);
 		break;
 	default:
-		stat = EXIT_FAILURE;
+		message(ERR, "%s: Bad magic: "
+			"%s is neither dvi nor pdf file.\n",
+			pname, iname);
+		stat = 1;
 		break;
 	}
 
 	fclose(input);
+
+	if	(stat)
+	{
+		fclose(tmp);
+		return EXIT_FAILURE;
+	}
+
+	if	(oname == NULL)
+	{
+		fclose(tmp);
+		return EXIT_SUCCESS;
+	}
+
+/*	copy file to output
+*/
+	rewind(tmp);
+
+	if	(oname && strcmp(oname, "-") != 0)
+	{
+		output = fopen(oname, "wb");
+
+		if	(!output)
+		{
+			fprintf(stderr, "%s: ", pname);
+			perror(oname);
+			fclose(tmp);
+			return EXIT_FAILURE;
+		}
+	}
+	else
+	{
+		oname = "<stdout>";
+		output = stdout;
+	}
+
+	message(NOTE, "%s: Copy data to %s\n", pname, oname);
+
+	while ((c = getc(tmp)) != EOF)
+		putc(c, output);
+
+	fclose(tmp);
+
+	if	(ferror(output))
+	{
+		perror(oname);
+		stat = EXIT_FAILURE;
+	}
+	else	stat = EXIT_SUCCESS;
+
 	fclose(output);
 	return stat;
 }
