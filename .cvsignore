@@ -2,6 +2,7 @@ ltxpost
 dvipost
 pplatex
 pptex
+config.*
 *.o
 *.dvi
 *.log

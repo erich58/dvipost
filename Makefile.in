@@ -16,38 +16,18 @@
 # If not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-intro::
-	@echo "Have a look at the Makefile, before running \`make all'"
+prefix = @prefix@
+exec_prefix = @exec_prefix@
 
-install::
-	@echo "There is nothing to install, \`make all' does all the work"
+CC=	@CC@
+CFLAGS=	@CFLAGS@ @kpseflag@
+LN=	@LN_S@
 
-# C complier
-
-CC=	gcc
-CFLAGS=	-g -Wall -Wmissing-prototypes -D_XOPEN_SOURCE
-
-# Directory to install binaries
-
-#BIN=	$(HOME)/bin
-#BIN=	/usr/local/bin
-#BIN=	/usr/bin
-BIN=	.
-
-all::	$(BIN)
-$(BIN):; mkdir -p $@
+BIN=	@bindir@
 
 # Directory to install LaTeX styles
 
-#TEXMF=	/usr/share/texmf
-#TEXMF=	/usr/share/texmf.local
-#TEXMF=	$(HOME)/texmf
-TEXMF=	.
-
-LATEX=	$(TEXMF)/tex/latex/misc
-
-all:: $(LATEX)
-$(LATEX):; mkdir -p $@
+LATEX=	@texpath@
 
 # Install names
 
@@ -59,7 +39,7 @@ FILES=	$(LATEX)/dvipost.sty
 
 # generating rules
 
-all:: $(NAME) $(ALIAS) $(FILES) tags test
+all:: $(NAME) $(ALIAS) tags test
 
 #	basic functions
 
@@ -92,7 +72,7 @@ $(NAME): $(OBJ); $(CC) $(CFLAGS) -o $@ $(OBJ)
 clean::; rm -f $(NAME)
 
 $(ALIAS): $(NAME)
-	ln -s $(NAME) $@
+	$(LN) $(NAME) $@
 
 clean::; rm -f $(ALIAS)
 
@@ -107,13 +87,15 @@ clean::; rm -f tags
 
 # install style files
 
-all:: $(FILES)
+install:: $(LATEX) $(FILES)
+
+$(LATEX):; mkdir -p $@
 
 $(LATEX)/dvipost.sty: dvipost.sty
 	cp dvipost.sty $@
 
-clean::; rm -f $(FILES)
-clean::; -rmdir -p $(LATEX)
+uninstall::; rm -f $(FILES)
+uninstall::; -rmdir -p $(LATEX)
 
 #	run test
 
@@ -134,13 +116,19 @@ clean:: purge
 
 ### local stuff ###
 
+configure: configure.in
+	autoconf
+
+Makefile: configure Makefile.in
+	configure
+
 # rules to create archiv
 
 export:: dvipost-0.8.tar.gz
 
 dvipost-0.8.tar.gz:
 	cvs export -r V0_8 -d $(@:.tar.gz=) ltxpost
-	sed -e '/local stuff/q' $(@:.tar.gz=)/Makefile > .tmp
+	sed -e '/local stuff/,$$d' $(@:.tar.gz=)/Makefile > .tmp
 	mv .tmp $(@:.tar.gz=)/Makefile
 	tar cvzf $@ $(@:.tar.gz=)
 	rm -rf $(@:.tar.gz=)
