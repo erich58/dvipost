@@ -14,6 +14,7 @@ int process_dvi (FILE *in, FILE *out)
 
 	if	(c != 2)
 	{
+		message(ERR, "$!: Bad DVI file: id byte not 2.\n");
 		return 1;
 	}
 
