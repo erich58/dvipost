@@ -20,7 +20,7 @@ If not, write to the Free Software Foundation, Inc.,
 
 \mpage[1] dvipost
 \Name
-dvipost, pptex, pplatex - post processing of DVI-Files
+dvipost, pptex, pplatex - post processing of dvi files
 
 \Synopsis
 |dvipost| [|-debug|] [|-version|] [|-help|] <in> <out>
