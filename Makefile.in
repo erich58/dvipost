@@ -20,7 +20,7 @@ prefix = @prefix@
 exec_prefix = @exec_prefix@
 
 CC=	@CC@
-CFLAGS=	@CFLAGS@ @kpseflag@
+CFLAGS=	@CFLAGS@ @kpseflag@ @texflag@
 LN=	@LN_S@
 
 INSTALL=	@INSTALL@
@@ -105,6 +105,11 @@ install::
 uninstall::
 	for p in $(FILES); do rm -f $(LATEX)/$$p; done
 
+# rebuild rules
+
+Makefile: configure Makefile.in
+	configure
+
 #	run test
 
 test:: test.dvi test.ps
@@ -124,19 +129,16 @@ clean:: purge
 
 ### local stuff ###
 
-Makefile: configure Makefile.in
-	configure
-
 # rules to create archiv
 
-export:: dvipost-0.8.tar.gz
+export:: dvipost-0.9.tar.gz
 
-dvipost-0.8.tar.gz:
-	cvs export -r V0_8 -d $(@:.tar.gz=) ltxpost
-	sed -e '/local stuff/,$$d' $(@:.tar.gz=)/Makefile > .tmp
-	mv .tmp $(@:.tar.gz=)/Makefile
+dvipost-0.9.tar.gz:
+	cvs export -r HEAD -d $(@:.tar.gz=) ltxpost
+	sed -e '/local stuff/,$$d' $(@:.tar.gz=)/Makefile.in > .tmp
+	mv .tmp $(@:.tar.gz=)/Makefile.in
 	tar cvzf $@ $(@:.tar.gz=)
-	rm -rf $(@:.tar.gz=)
+	#rm -rf $(@:.tar.gz=)
 
 purge::
 	rm -f *.tar.gz
