@@ -52,15 +52,15 @@ clean::; rm -f ctags
 
 #	run test
 
-test:: test.1 test.2
+test:: test.txt test.log
 
 test.dvi: test.tex
 	latex test
 	rm -f test.log test.aux
 
-test.1: test.dvi; dvitype test.dvi > test.1
-test.2: test.dvi ltxpost; ltxpost -v test.dvi 2> test.2
+test.txt: test.dvi; dvitype test.dvi > $@
+test.log: test.dvi ltxpost; ltxpost -v test.dvi 2> $@
 
-purge::; rm -f test.1 test.2 test.dvi
+purge::; rm -f test.txt test.log test.dvi
 
 clean:: purge
