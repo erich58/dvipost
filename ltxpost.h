@@ -3,8 +3,8 @@
 	A-3423 St.Andrä/Wördern, Südtirolergasse 17-21/5
 */
 
-#ifndef	dvipost_h
-#define	dvipost_h	1
+#ifndef	ltxpost_h
+#define	ltxpost_h	1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +24,5 @@ extern char *xcopy (const char *str);
 
 extern int process_dvi (const char *id, FILE *in, FILE *out);
 extern int process_pdf (const char *id, FILE *in, FILE *out);
-extern int tfm_load (int *width, const char *name, int size);
 
-#endif	/* dvipost.h */
+#endif	/* ltxpost.h */
