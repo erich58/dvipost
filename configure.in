@@ -35,18 +35,19 @@ then	AC_MSG_RESULT(kpsewhich needs type)
 else	AC_MSG_RESULT(ok)
 fi
 
-AC_SUBST(kpseflag)
 AC_SUBST(texpath)
+AC_SUBST(kpseflag)
 
 AC_MSG_CHECKING(if latex accepts options)
-if	latex -version < /dev/null > /dev/null
-then	texflag=""
-else	texflag="-DXXX"
-fi
 
-if	test "$texflag" = ""
-then	AC_MSG_RESULT("yes")
-else	AC_MSG_RESULT(no)
+if
+	latex -version < /dev/null > /dev/null
+then
+	texflag=""
+	AC_MSG_RESULT("yes")
+else
+	texflag="-DLATEX_NOOPT"
+	AC_MSG_RESULT("no")
 fi
 
 AC_SUBST(texflag)
