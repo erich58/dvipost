@@ -4,10 +4,8 @@
 */
 
 #include "ltxpost.h"
-#include "tfm.h"
 #include <ctype.h>
 
-double tfm_conv = 0.;
 static char tfm_buf[1024];
 static int tfm_err = 0;
 static int tfm_pos = 0;
@@ -53,26 +51,24 @@ static void tfm_skip (FILE *file, int n)
 		tfm_byte(file);
 }
 
-static int tfm2dvi (int val)
+static int tfm_scale (int a, int b)
 {
-	if	(val < 0)
-	{
-		return -(tfm_conv * -val + 0.5);
-	}
-	else	return tfm_conv * val + 0.5;
+	register int al, bl;
+
+	if (a < 0)	return -tfm_scale(-a, b);
+	if (b < 0)	return -tfm_scale(a, -b);
+
+	al = a & 32767;
+	bl = b & 32767;
+	a >>= 15;
+	b >>= 15;
+	return ((al * bl / 32768) + a * bl + al * b) / 32 + a * b * 1024;
 }
 
-#if	0
-static double tfm2pt (int val)
-{
-	return val / (double) 0x100000;
-}
-#endif
-
-int tfm_load (TFM *tfm, const char *name, int scale)
+int tfm_load (int *width, const char *name, int scale)
 {
 	FILE *file;
-	unsigned width[256];
+	int wtab[256];
 	int lh, bc, ec, nw;
 	int i, n;
 
@@ -119,33 +115,26 @@ int tfm_load (TFM *tfm, const char *name, int scale)
 	(void) tfm_dim(file);	/* words in kern table */
 	(void) tfm_dim(file);	/* words in extensible char table */
 	(void) tfm_dim(file);	/* words of font parameter data */
-
-	if	(lh > 2)
-	{
-		(void) tfm_word(file);
-		tfm->dsize = tfm2dvi(tfm_word(file));
-		tfm_skip(file, 4 * lh - 8);
-
-		if	(tfm->dsize && scale != tfm->dsize)
-			message(STAT, " (this font is magnified %.0f%%) \n",
-				100. * scale / tfm->dsize);
-	}
-	else	tfm_skip(file, 4 * lh);
+	tfm_skip(file, 4 * lh);
 
 	for (i = 0; i < 256; i++)
-		tfm->width[i] = 0;
+		width[i] = 0;
 
 	for (i = bc; i <= ec; i++)
 	{
-		tfm->width[i] = tfm_byte(file);
+		int n = tfm_byte(file);
+
+		if	(n < 256)
+			width[i] = n;
+
 		tfm_skip(file, 3);
 	}
 
 	for (i = 0; i < nw; i++)
-		width[i] = tfm2dvi(tfm_word(file));
+		wtab[i] = tfm_scale(tfm_word(file), scale);
 	
 	for (i = bc; i <= ec; i++)
-		tfm->width[i] = width[tfm->width[i]];
+		width[i] = wtab[width[i]];
 
 	fclose(file);
 	return tfm_err;

@@ -23,5 +23,6 @@ extern void xfree (void *data);
 
 extern int process_dvi (const char *id, FILE *in, FILE *out);
 extern int process_pdf (const char *id, FILE *in, FILE *out);
+extern int tfm_load (int *width, const char *name, int size);
 
 #endif	/* dvipost.h */

@@ -71,6 +71,6 @@ void DviFont_add (DviToken *token)
 
 	message(STAT, "---loaded at size %d DVI units \n", SCALE(fp));
 
-	tfm_load(&fp->tfm, token->str, SCALE(fp));
+	tfm_load(fp->width, token->str, SCALE(fp));
 	qsort(DviFontTab, DviFontDim, sizeof(DviFont), cmp_font);
 }

@@ -5,7 +5,7 @@ all:: ltxpost tags test
 #	basic functions
 
 HDR=	ltxpost.h
-BASE=	message.c alloc.c
+BASE=	message.c alloc.c tfm.c
 
 $(BASE:.c=.o): $(HDR)
 
@@ -13,8 +13,8 @@ clean::; rm -f $(BASE:.c=.o)
 
 #	dvi specific functions
 
-DVIHDR=	dvi.h dvicmd.h tfm.h
-DVI=	dvifile.c din.c dout.c dvifont.c dvi.c tfm.c
+DVIHDR=	dvi.h dvicmd.h
+DVI=	dvifile.c din.c dout.c dvifont.c dvi.c
 
 $(DVI:.c=.o): $(HDR) $(DVIHDR)
 

@@ -33,22 +33,9 @@ static void set_unit (DviToken *token)
 	dvi_unit.num = token->par[0];
 	dvi_unit.den = token->par[1];
 	dvi_unit.mag = token->par[2];
-	tfm_conv = (25400000.0 / dvi_unit.num);
-	tfm_conv *= (dvi_unit.den / 473628672.) / 16.0;
 	dvi_unit.true_conv = (dvi_unit.num / 254000.0);
 	dvi_unit.true_conv *= (RESOLUTION / dvi_unit.den);
 	dvi_unit.conv = dvi_unit.true_conv * (dvi_unit.mag / 1000.);
-
-#if	DEBUG
-	if	(verboselevel < STAT)	return;
-
-	fprintf(stderr, "  Resolution = %.8f pixels per inch \n", RESOLUTION);
-	fprintf(stderr, "numerator/denominator=%d/%d \n",
-		dvi_unit.num, dvi_unit.den);
-	fprintf(stderr, "magnification=%d; %16.8f pixels per DVI unit \n",
-		dvi_unit.mag, dvi_unit.conv);
-	fprintf(stderr, "'%s'\n", token->str);
-#endif
 }
 
 #if	DEBUG
@@ -119,7 +106,7 @@ static void dbg_type (DviToken *token)
 #define	dbg(args)	dbg_printf args
 
 #define	dbg_level(level)	\
-dbg_printf("\nlevel %d:(h=%d,v=%d,w=%d,x=%d,y=%d,z=%d,hh=%d,vv=%d) ", \
+dbg_printf("\nlevel %d:(h=%d,v=%d,w=%d,x=%d,y=%d,z=%d) ", \
 	level, dvi_stat.h, dvi_stat.v, dvi_stat.w, dvi_stat.x,	\
 	dvi_stat.y, dvi_stat.z, pixel(dvi_stat.h), pixel(dvi_stat.v))
 
@@ -150,7 +137,7 @@ static void mv_right(int val)
 {
 	dbg(("h:=%d%+d", dvi_stat.h, val));
 	dvi_stat.h += val;
-	dbg(("=%d, hh:=%d ", dvi_stat.h, pixel(dvi_stat.h)));
+	dbg(("=%d ", dvi_stat.h));
 }
 
 int process_dvi (const char *id, FILE *ifile, FILE *ofile)
@@ -185,7 +172,7 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 			dbg(("%d v:=%d%+d", token->par[0],
 				dvi_stat.v, token->par[0]));
 			dvi_stat.v += token->par[0];
-			dbg(("=%d, vv:=%d ", dvi_stat.v, pixel(dvi_stat.v)));
+			dbg(("=%d ", dvi_stat.v));
 			break;
 		case DVI_RIGHT1:
 		case DVI_RIGHT2:
@@ -242,7 +229,7 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 		default:
 			if	(token->type <= DVI_SETC_127)
 			{
-				mv_right(dvi_font->tfm.width[token->type]);
+				mv_right(dvi_font->width[token->type]);
 			}
 			else if	(token->type < DVI_FONT_00)
 			{
