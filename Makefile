@@ -58,7 +58,10 @@ test.dvi: test.tex
 	latex test
 	rm -f test.log test.aux
 
-test.txt: test.dvi; dvitype test.dvi > $@
+NO_HH=	-e 's/[, ]*hh[:=]*[-0-9][0-9]*//g'
+NO_VV=	-e 's/[, ]*vv[:=]*[-0-9][0-9]*//g'
+
+test.txt: test.dvi; dvitype test.dvi | sed -e '1,/^ $$/d' $(NO_HH) $(NO_VV) > $@
 test.log: test.dvi ltxpost; ltxpost -v test.dvi 2> $@
 
 purge::; rm -f test.txt test.log test.dvi
