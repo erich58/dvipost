@@ -2,16 +2,51 @@ CFLAGS=	-g -Wall -Wmissing-prototypes -D_POSIX_SOURCE
 
 all:: ltxpost ctags
 
-HDR=	ltxpost.h dvi.h dvicmd.h
-OBJ=	ltxpost.o message.o pdf.o dvifile.o din.o dout.o dvi.o
+#	basic functions
 
-$(OBJ): $(HDR)
+HDR=	ltxpost.h
+BASE=	message.c
 
-clean::
-	rm -f ltxpost $(OBJ)
+$(BASE:.c=.o): $(HDR)
 
-ltxpost: $(OBJ)
-	$(CC) -o $@ $(OBJ)
+clean::; rm -f $(BASE:.c=.o)
 
-ctags: $(OBJ:.c=.h)
-	ctags *.c *.h
+#	dvi specific functions
+
+DVIHDR=	dvi.h dvicmd.h
+DVI=	dvifile.c din.c dout.c dvi.c
+
+$(DVI:c=.o): $(HDR) $(DVIHDR)
+
+clean::; rm -f $(DVI:.c=.o)
+
+#	pdf specific functions
+
+PDFHDR=	
+PDF=	pdf.c
+
+$(PDF:c=.o): $(HDR) $(PDFHDR)
+
+clean::; rm -f $(PDF:.c=.o)
+
+#	rules for post filter
+
+ltxpost.o: $(HDR) $(DVIHDR) $(PDFHDR)
+
+clean::; rm -f ltxpost.o
+
+OBJ=	ltxpost.o $(BASE:.c=.o) $(DVI:.c=.o) $(PDF:.c=.o)
+
+ltxpost: $(OBJ); $(CC) -o $@ $(OBJ)
+
+clean::; rm -f ltxpost
+
+#	rules for ctags file
+
+SRC=	ltxpost.c $(HDR) $(BASE) $(DVIHDR) $(DVI) $(PDFHDR) $(PDF)
+
+ctags: $(SRC)
+	ctags $(SRC)
+
+clean::; rm -f ctags
+
