@@ -164,6 +164,12 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 		case DVI_SET2:
 		case DVI_SET3:
 		case DVI_SET4:
+			mv_right(dvi_font->width[token->par[0] & 0xff]);
+			break;
+		case DVI_SET_RULE:
+			dbg(("height %d, width %d \n ",
+				token->par[0], token->par[1]));
+			mv_right(token->par[1]);
 			break;
 		case DVI_DOWN1:
 		case DVI_DOWN2:
@@ -180,6 +186,26 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 		case DVI_RIGHT4:
 			dbg(("%d ", token->par[0]));
 			mv_right(token->par[0]);
+			break;
+		case DVI_W1:
+		case DVI_W2:
+		case DVI_W3:
+		case DVI_W4:
+			dvi_stat.w = token->par[0];
+			/*FALLTHROUGH*/
+		case DVI_W0:
+			dbg(("%d ", dvi_stat.w));
+			mv_right(dvi_stat.w);
+			break;
+		case DVI_X1:
+		case DVI_X2:
+		case DVI_X3:
+		case DVI_X4:
+			dvi_stat.x = token->par[0];
+			/*FALLTHROUGH*/
+		case DVI_X0:
+			dbg(("%d ", dvi_stat.x));
+			mv_right(dvi_stat.x);
 			break;
 		case DVI_BOP:
 			dbg(("%d ", token->par[0]));
