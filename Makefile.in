@@ -89,7 +89,7 @@ uninstall-exec:
 	for p in $(NAME) $(ALIAS); do rm -f $(BIN)/$$p; done
 
 install-exec: uninstall-exec
-	$(INSTALL_DATA) $(NAME) $(BIN)/$(NAME)
+	$(INSTALL_PROGRAM) $(NAME) $(BIN)/$(NAME)
 	(cd $(BIN); for p in $(ALIAS); do rm -f $$p; $(LN) $(NAME) $$p; done)
 
 uninstall-data:
