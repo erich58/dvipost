@@ -33,10 +33,13 @@ BIN=	@bindir@
 
 LATEX=	@texpath@
 
+MANEXT=	1
+MANDIR=	@mandir@/man$(MANEXT)
+
 # Install names
 
 NAME=	dvipost
-ALIAS=	pptex pplatex ltxpost
+ALIAS=	pptex pplatex
 FILES=	dvipost.sty
 
 ### End of configuration part ###
@@ -82,8 +85,8 @@ clean::; rm -f $(ALIAS)
 
 # install style files
 
-install: install-exec install-data
-uninstall: uninstall-exec uninstall-data
+install: install-exec install-data install-man
+uninstall: uninstall-exec uninstall-data uninstall-man
 
 uninstall-exec:
 	for p in $(NAME) $(ALIAS); do rm -f $(BIN)/$$p; done
@@ -91,6 +94,16 @@ uninstall-exec:
 install-exec: uninstall-exec
 	$(INSTALL_PROGRAM) $(NAME) $(BIN)/$(NAME)
 	(cd $(BIN); for p in $(ALIAS); do rm -f $$p; $(LN) $(NAME) $$p; done)
+
+uninstall-man:
+	for p in $(NAME) $(ALIAS); do rm -f $(MANIR)/$$p.$(MANEXT); done
+
+install-man: uninstall-man
+	$(INSTALL_DATA) dvipost.1 $(MANDIR)/$(NAME).$(MANEXT)
+	(cd $(MANDIR); for p in $(ALIAS); \
+		do rm -f $$p.$(MANEXT); \
+		$(LN) $(NAME).$(MANEXT) $$p.$(MANEXT); \
+	done)
 
 uninstall-data:
 	for p in $(FILES); do rm -f $(LATEX)/$$p; done
