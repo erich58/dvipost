@@ -1,0 +1,14 @@
+Version 0.9:
+
+Added autoconf script to create Makefile.
+Included some missing headers into source files.
+
+Support for interactive running (la)tex: Run dvipost
+on all *.dvi files which are changed after running (la)tex.
+
+Support for old teTeX versions which have a different
+syntax of running latex (no options allowed) and kpsewhich
+(needs type of requested file as first argument).
+(for example: teTeX 0.3.4).
+
+Testet under AIX 3.2 with xlc.
