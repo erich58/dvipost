@@ -882,14 +882,15 @@ fi
 
 echo $ac_n "checking if latex accepts options""... $ac_c" 1>&6
 echo "configure:885: checking if latex accepts options" >&5
-if	latex -version < /dev/null > /dev/null
-then	texflag=""
-else	texflag="-DXXX"
-fi
 
-if	test "$texflag" = ""
-then	echo "$ac_t"""yes"" 1>&6
-else	echo "$ac_t""no" 1>&6
+if
+	latex -version < /dev/null > /dev/null
+then
+	texflag=""
+	echo "$ac_t"""yes"" 1>&6
+else
+	texflag="-DLATEX_NOOPT"
+	echo "$ac_t"""no"" 1>&6
 fi
 
 
@@ -1043,8 +1044,8 @@ s%@INSTALL_PROGRAM@%$INSTALL_PROGRAM%g
 s%@INSTALL_SCRIPT@%$INSTALL_SCRIPT%g
 s%@INSTALL_DATA@%$INSTALL_DATA%g
 s%@LN_S@%$LN_S%g
-s%@kpseflag@%$kpseflag%g
 s%@texpath@%$texpath%g
+s%@kpseflag@%$kpseflag%g
 s%@texflag@%$texflag%g
 
 CEOF
