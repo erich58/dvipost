@@ -67,3 +67,12 @@ purge::; rm -f test.ps test.dvi test.pre test.post
 purge::; rm -f *.log *.aux
 clean:: purge
 
+export:: ltxpost-0.1.tar.gz
+
+ltxpost-0.1.tar.gz:
+	cvs export -r V0_1 -d $(@:.tar.gz=) ltxpost
+	tar cvzf $@ $(@:.tar.gz=)
+	rm -rf $(@:.tar.gz=)
+
+purge::
+	rm -f *.tar.gz
