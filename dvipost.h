@@ -14,6 +14,7 @@
 #define	STAT	2
 #define	DBG	3
 
+extern char *pname;
 extern int verboselevel;
 extern void message (int level, const char *fmt, ...);
 

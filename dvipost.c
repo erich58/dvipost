@@ -9,10 +9,8 @@
 #include <unistd.h>
 #include <getopt.h>
 
-extern int optind;
-extern char *optarg;
-
-char *pname = "DVIPost";
+/*	print usage information
+*/
 
 static void usage (int flag)
 {
@@ -28,9 +26,13 @@ static void usage (int flag)
 	exit(flag >= 0 ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 
+/*	the main programm
+*/
 
 int main (int argc, char **argv)
 {
+	extern int optind;
+	extern char *optarg;
 	char *iname, *oname;
 	FILE *input, *tmp, *output;
 	int opt;
@@ -103,7 +105,7 @@ int main (int argc, char **argv)
 
 /*	check magic and process input
 */
-	message(NOTE, "%s: Process input file %s\n", pname, iname);
+	message(NOTE, "$!: Process input file %s\n", iname);
 	c = getc(input);
 
 	switch (c)
@@ -115,9 +117,9 @@ int main (int argc, char **argv)
 		stat = process_pdf(input, tmp);
 		break;
 	default:
-		message(ERR, "%s: Bad magic: "
+		message(ERR, "$!: Bad magic: "
 			"%s is neither dvi nor pdf file.\n",
-			pname, iname);
+			iname);
 		stat = 1;
 		break;
 	}
@@ -158,7 +160,7 @@ int main (int argc, char **argv)
 		output = stdout;
 	}
 
-	message(NOTE, "%s: Copy data to %s\n", pname, oname);
+	message(NOTE, "$!: Copy data to %s\n", oname);
 
 	while ((c = getc(tmp)) != EOF)
 		putc(c, output);
@@ -167,6 +169,7 @@ int main (int argc, char **argv)
 
 	if	(ferror(output))
 	{
+		fprintf(stderr, "%s: ", pname);
 		perror(oname);
 		stat = EXIT_FAILURE;
 	}

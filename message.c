@@ -6,6 +6,7 @@
 #include "dvipost.h"
 #include <stdarg.h>
 
+char *pname = "DVIPost";
 int verboselevel = NOTE;
 
 void message (int level, const char *fmt, ...)
@@ -13,6 +14,17 @@ void message (int level, const char *fmt, ...)
 	if	(level <= verboselevel)
 	{
 		va_list list;
+
+		if	(*fmt == '$')
+		{
+			fmt++;
+
+			if	(*fmt == '!')
+			{
+				fputs(pname, stderr);
+				fmt++;
+			}
+		}
 
 		va_start(list, fmt);
 		vfprintf(stderr, fmt, list);
