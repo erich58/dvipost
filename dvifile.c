@@ -5,9 +5,9 @@
 #include "dvi.h"
 #include <stdarg.h>
 
-DviInput *din_init (DviInput *df, const char *name, FILE *file)
+DviFile *df_init (DviFile *df, const char *name, FILE *file)
 {
-	static DviInput buf;
+	static DviFile buf;
 
 	if	(df == NULL)	df = &buf;
 
@@ -19,7 +19,7 @@ DviInput *din_init (DviInput *df, const char *name, FILE *file)
 	return df;
 }
 
-void din_fatal (DviInput *df, const char *fmt, ...)
+void df_fatal (DviFile *df, const char *fmt, ...)
 {
 	va_list list;
 
@@ -32,13 +32,13 @@ void din_fatal (DviInput *df, const char *fmt, ...)
 }
 
 
-int din_byte (DviInput *df)
+int din_byte (DviFile *df)
 {
 	int c = getc(df->file);
 
 	if	(c == EOF)
 	{
-		din_fatal(df, "Unexpected end of file.");
+		df_fatal(df, "Unexpected end of file.");
 		return 0;
 	}
 
@@ -47,7 +47,7 @@ int din_byte (DviInput *df)
 }
 
 
-int din_unsigned (DviInput *df, unsigned len)
+int din_unsigned (DviFile *df, unsigned len)
 {
 	int val = din_byte(df);
 
@@ -58,7 +58,7 @@ int din_unsigned (DviInput *df, unsigned len)
 }
 
 
-int din_signed (DviInput *df, unsigned len)
+int din_signed (DviFile *df, unsigned len)
 {
 	int val = din_byte(df);
 
@@ -72,13 +72,13 @@ int din_signed (DviInput *df, unsigned len)
 }
 
 
-char *din_string (DviInput *df, char *tg, unsigned len)
+char *din_string (DviFile *df, char *tg, unsigned len)
 {
 	static char buf[256];
 	int n;
 
 	if	(len > 255)
-		din_fatal(df, "can't read string of size %d", len);
+		df_fatal(df, "can't read string of size %d", len);
 
 	if	(tg == NULL)	tg = buf;
 
@@ -89,7 +89,7 @@ char *din_string (DviInput *df, char *tg, unsigned len)
 	return tg;
 }
 
-void din_trace (DviInput *df, const char *fmt, ...)
+void din_trace (DviFile *df, const char *fmt, ...)
 {
 	if	(df->trace || verboselevel >= STAT)
 	{

@@ -14,7 +14,7 @@ static void putval (FILE *file, int len, unsigned val)
 	putc(val, file);
 }
 
-static void parse_pre (DviInput *df, FILE *out)
+static void parse_pre (DviFile *df, FILE *out)
 {
 	unsigned n;
 	char *desc;
@@ -25,7 +25,7 @@ static void parse_pre (DviInput *df, FILE *out)
 
 	if	(n != 2)
 	{
-		din_fatal(df, "Bad DVI file: id byte not 2.");
+		df_fatal(df, "Bad DVI file: id byte not 2.");
 		return;
 	}
 
@@ -40,7 +40,7 @@ static void parse_pre (DviInput *df, FILE *out)
 	din_trace(df, "'%s'\n", desc);
 }
 
-static void parse_fntdef (DviInput *df, FILE *out, int n)
+static void parse_fntdef (DviFile *df, FILE *out, int n)
 {
 	int font;
 	int a, l;
@@ -66,7 +66,7 @@ static void parse_fntdef (DviInput *df, FILE *out, int n)
 	din_trace(df, "\n");
 }
 
-static int parse_post(DviInput *df, FILE *out)
+static int parse_post(DviFile *df, FILE *out)
 {
 	int c, n;
 	unsigned start;
@@ -108,10 +108,10 @@ static int parse_post(DviInput *df, FILE *out)
 			n = df->pos - 1;
 
 			if	(din_unsigned(df, 4) != start)
-				din_fatal(df, "Incorrect start of Postamble.");
+				df_fatal(df, "Incorrect start of Postamble.");
 
 			if	(din_byte(df) != 2)
-				din_fatal(df, "Bad Postamble: id byte not 2.");
+				df_fatal(df, "Bad Postamble: id byte not 2.");
 
 			putval(out, 4, start);
 			putval(out, 1, 2);
@@ -124,7 +124,7 @@ static int parse_post(DviInput *df, FILE *out)
 
 			return 0;
 		default:
-			din_fatal(df, "Command %d not allowed in postamble.",
+			df_fatal(df, "Command %d not allowed in postamble.",
 				c);
 			break;
 		}
@@ -138,12 +138,12 @@ static int parse_post(DviInput *df, FILE *out)
 
 int process_dvi (const char *id, FILE *in, FILE *out)
 {
-	DviInput *df;
+	DviFile *df;
 	int par;
 	int post;
 	int c;
 
-	df = din_init(NULL, id, in);
+	df = df_init(NULL, id, in);
 	parse_pre(df, out);
 	c = din_byte(df);
 	post = 0;
@@ -331,12 +331,12 @@ int process_dvi (const char *id, FILE *in, FILE *out)
 			parse_fntdef(df, out, 4);
 			break;
 		case DVI_PRE:	/* preamble */
-			din_fatal(df, "PRE occures within file.");
+			df_fatal(df, "PRE occures within file.");
 			break;
 		case DVI_POST:	/* postamble beginning */
 			return parse_post(df, out);
 		case DVI_POST_POST: /* postamble ending */
-			din_fatal(df, "POST_POST without PRE.");
+			df_fatal(df, "POST_POST without PRE.");
 			break;
 		default:
 
@@ -348,7 +348,7 @@ int process_dvi (const char *id, FILE *in, FILE *out)
 			{
 				;
 			}
-			else	din_fatal(df, "undefined command %d.", c);
+			else	df_fatal(df, "undefined command %d.", c);
 
 			break;
 		}
