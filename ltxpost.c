@@ -69,7 +69,7 @@ int main (int argc, char **argv)
 	if	(optind < argc)
 		usage(0);
 
-	message(NOTE, "This is DVIPost, Version $Id$.\n");
+	message(NOTE, "This is DVIPost, Version 0.1, $Revision$.\n");
 
 /*	open temporary file
 */
