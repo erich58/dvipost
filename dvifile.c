@@ -5,9 +5,9 @@
 #include "dvi.h"
 #include <stdarg.h>
 
-DVIFile *df_init (DVIFile *df, const char *name, FILE *file)
+DviInput *df_init (DviInput *df, const char *name, FILE *file)
 {
-	static DVIFile buf;
+	static DviInput buf;
 
 	if	(df == NULL)	df = &buf;
 
@@ -19,7 +19,7 @@ DVIFile *df_init (DVIFile *df, const char *name, FILE *file)
 	return df;
 }
 
-void df_fatal (DVIFile *df, const char *fmt, ...)
+void df_fatal (DviInput *df, const char *fmt, ...)
 {
 	va_list list;
 
@@ -32,7 +32,7 @@ void df_fatal (DVIFile *df, const char *fmt, ...)
 }
 
 
-int df_byte (DVIFile *df)
+int df_byte (DviInput *df)
 {
 	int c = getc(df->file);
 
@@ -47,7 +47,7 @@ int df_byte (DVIFile *df)
 }
 
 
-int df_unsigned (DVIFile *df, unsigned len)
+int df_unsigned (DviInput *df, unsigned len)
 {
 	int val = df_byte(df);
 
@@ -58,7 +58,7 @@ int df_unsigned (DVIFile *df, unsigned len)
 }
 
 
-int df_signed (DVIFile *df, unsigned len)
+int df_signed (DviInput *df, unsigned len)
 {
 	int val = df_byte(df);
 
@@ -72,7 +72,7 @@ int df_signed (DVIFile *df, unsigned len)
 }
 
 
-char *df_string (DVIFile *df, char *tg, unsigned len)
+char *df_string (DviInput *df, char *tg, unsigned len)
 {
 	static char buf[256];
 	int n;
@@ -80,7 +80,7 @@ char *df_string (DVIFile *df, char *tg, unsigned len)
 	if	(len > 255)
 		df_fatal(df, "can't read string of size %d", len);
 
-	if	(tg == NULL)	tg = &buf;
+	if	(tg == NULL)	tg = buf;
 
 	for (n = 0; df->ok && len-- > 0; n++)
 		tg[n] = df_byte(df);
@@ -89,7 +89,7 @@ char *df_string (DVIFile *df, char *tg, unsigned len)
 	return tg;
 }
 
-void df_trace (DVIFile *df, const char *fmt, ...)
+void df_trace (DviInput *df, const char *fmt, ...)
 {
 	if	(df->trace || verboselevel >= STAT)
 	{

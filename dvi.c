@@ -14,7 +14,7 @@ static void putval (FILE *file, int len, unsigned val)
 	putc(val, file);
 }
 
-static void parse_pre (DVIFile *df, FILE *out)
+static void parse_pre (DviInput *df, FILE *out)
 {
 	unsigned n;
 	char *desc;
@@ -40,7 +40,7 @@ static void parse_pre (DVIFile *df, FILE *out)
 	df_trace(df, "'%s'\n", desc);
 }
 
-static void parse_fntdef (DVIFile *df, FILE *out, int n)
+static void parse_fntdef (DviInput *df, FILE *out, int n)
 {
 	int font;
 	int a, l;
@@ -66,7 +66,7 @@ static void parse_fntdef (DVIFile *df, FILE *out, int n)
 	df_trace(df, "\n");
 }
 
-static int parse_post(DVIFile *df, FILE *out)
+static int parse_post(DviInput *df, FILE *out)
 {
 	int c, n;
 	unsigned start;
@@ -138,7 +138,7 @@ static int parse_post(DVIFile *df, FILE *out)
 
 int process_dvi (const char *id, FILE *in, FILE *out)
 {
-	DVIFile *df;
+	DviInput *df;
 	int par;
 	int post;
 	int c;
