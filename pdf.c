@@ -9,6 +9,8 @@ int process_pdf (const char *id, FILE *in, FILE *out)
 {
 	int c;
 
+	message(NOTE, "$!: The PDF-Filter is not yet implemented.\n");
+	message(NOTE, "$!: No transformation is perfored on input file.\n");
 	putc('%', out);
 
 	while ((c = getc(in)) != EOF)
