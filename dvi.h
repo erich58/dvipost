@@ -15,7 +15,6 @@ typedef struct {
 	FILE *file;	/* file pointer */
 	unsigned pos;	/* file position */
 	int ok;		/* status flag */
-	int trace;	/* trace flag */
 	int last_page;	/* offset of last page */
 	int depth;	/* stack depth */
 	int mdepth;	/* maximum depth size */
@@ -24,7 +23,6 @@ typedef struct {
 
 extern DviFile *df_init (DviFile *buf, const char *name, FILE *file);
 extern void df_fatal (DviFile *df, const char *fmt, ...);
-extern void df_trace (DviFile *df, const char *fmt, ...);
 
 extern int din_byte (DviFile *df);
 extern int din_signed (DviFile *df, unsigned len);

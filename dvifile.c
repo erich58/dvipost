@@ -34,14 +34,3 @@ void df_fatal (DviFile *df, const char *fmt, ...)
 	putc('\n', stderr);
 	df->ok = 0;
 }
-
-void df_trace (DviFile *df, const char *fmt, ...)
-{
-	if	(df->trace || verboselevel >= STAT)
-	{
-		va_list list;
-		va_start(list, fmt);
-		vfprintf(stderr, fmt, list);
-		va_end(list);
-	}
-}

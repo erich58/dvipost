@@ -67,7 +67,7 @@ static void dbg_printf (const char *fmt, ...)
 
 static void dbg_beg (DviFile *df)
 {
-	dbg_pos = (df->trace || verboselevel >= STAT) ? df->pos : 0;
+	dbg_pos = (verboselevel >= STAT) ? df->pos : 0;
 }
 
 static void dbg_end (void)
