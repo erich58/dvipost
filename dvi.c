@@ -112,14 +112,6 @@ dbg_printf("\nlevel %d:(h=%d,v=%d,w=%d,x=%d,y=%d,z=%d) ", level, \
 #define	dbg_font(font)	\
 dbg_printf("current font is %s ", font ? font->token.str : "<undef>");
 
-static int pixel (int val)
-{
-	if	(val < 0)
-		return -(int) (-val * dvi_unit.conv + 0.5);
-	
-	return (int) (val * dvi_unit.conv + 0.5);
-}
-
 #else
 
 #define	dbg_beg(df)
@@ -128,7 +120,6 @@ static int pixel (int val)
 #define	dbg_type(token)
 #define	dbg_level(level)
 #define	dbg_font(font)
-#define	pixel(x)	0
 
 #endif
 
