@@ -479,12 +479,13 @@ static void endpage (DviFile *out)
 		dvi_stat.h += marginparwidth - layout;
 		dout_putrule(out, textheight, layout);
 
-		y0 += textheight + footskip - footheight;
-		cmd_goto(out, y0, x0);
 		footheight = headheight;
 
 		if	(footheight > footskip)
 			footheight = footskip;
+
+		y0 += textheight + footskip - footheight;
+		cmd_goto(out, y0, x0);
 
 		dout_putrule(out, layout, textwidth);
 		cmd_move(out, footheight, 0);
