@@ -52,7 +52,7 @@
 #define	DVI_Z3             169	/* ??? */
 #define	DVI_Z4             170	/* ??? */
 #define	DVI_FONT_00        171	/* set current font to 0 */
-#define	DVI_FONT_63        234	/* set current font to 0 */
+#define	DVI_FONT_63        234	/* set current font to 63 */
 #define	DVI_FNT1           235	/* set current font */
 #define	DVI_FNT2           236	/* Same as FNT1, except that arg is 2 bytes */
 #define	DVI_FNT3           237	/* Same as FNT1, except that arg is 3 bytes */
