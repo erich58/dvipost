@@ -37,7 +37,6 @@ void pos_init (PosTab *pos);
 void pos_add (PosTab *pos, int beg, int end);
 
 extern int process_dvi (const char *id, FILE *in, FILE *out);
-extern int process_pdf (const char *id, FILE *in, FILE *out);
 extern int dvipost (const char *iname, const char *oname);
 
 #endif	/* ltxpost.h */

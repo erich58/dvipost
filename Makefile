@@ -23,15 +23,6 @@ $(DVI:.c=.o): $(HDR) $(DVIHDR)
 
 clean::; rm -f $(DVI:.c=.o)
 
-#	pdf specific functions
-
-PDFHDR=	
-PDF=	pdf.c
-
-$(PDF:.c=.o): $(HDR) $(PDFHDR)
-
-clean::; rm -f $(PDF:.c=.o)
-
 #	rules for command
 
 main.o: $(HDR) $(DVIHDR)
@@ -51,7 +42,7 @@ clean::; rm -f $(ALIAS)
 
 #	rules for ctags file
 
-SRC=	main.c $(HDR) $(BASE) $(DVIHDR) $(DVI) $(PDFHDR) $(PDF)
+SRC=	main.c $(HDR) $(BASE) $(DVIHDR) $(DVI)
 
 tags: $(SRC)
 	ctags $(SRC)
