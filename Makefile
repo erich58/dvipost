@@ -1,6 +1,6 @@
 CFLAGS=	-g -Wall -Wmissing-prototypes -D_POSIX_SOURCE
 
-all:: ltxpost ctags
+all:: ltxpost tags
 
 #	basic functions
 
@@ -14,7 +14,7 @@ clean::; rm -f $(BASE:.c=.o)
 #	dvi specific functions
 
 DVIHDR=	dvi.h dvicmd.h
-DVI=	dvifile.c din.c dout.c dvi.c
+DVI=	dvifile.c din.c dout.c dviex.c dvi.c
 
 $(DVI:c=.o): $(HDR) $(DVIHDR)
 
@@ -45,7 +45,7 @@ clean::; rm -f ltxpost
 
 SRC=	ltxpost.c $(HDR) $(BASE) $(DVIHDR) $(DVI) $(PDFHDR) $(PDF)
 
-ctags: $(SRC)
+tags: $(SRC)
 	ctags $(SRC)
 
 clean::; rm -f ctags

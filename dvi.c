@@ -130,6 +130,7 @@ static int parse_post(DviFile *df, DviFile *out)
 int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 {
 	DviFile dvifile[2], *df, *out;
+	DviExtension *ext;
 	int par;
 	int pos;
 	int c;
@@ -303,17 +304,13 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 		case DVI_FNT4:	/* Same as FNT1, except that arg is 4 bytes */
 			dout_unsigned(out, din_unsigned(df, 4), 4);
 			break;
-		case DVI_XXX1:	/* extension to \.DVI primitives */
-			dout_unsigned(out, din_unsigned(df, 1), 1);
-			break;
+		case DVI_XXX1:	/* extension to .DVI primitives */
 		case DVI_XXX2:	/* Like XXX1, but 0<=k<65536 */
-			dout_unsigned(out, din_unsigned(df, 2), 2);
-			break;
 		case DVI_XXX3:	/* Like XXX1, but 0<=k<@t$2^{24}$@> */
-			dout_unsigned(out, din_unsigned(df, 3), 3);
-			break;
-		case DVI_XXX4:	/* long extension to \.DVI primitives */
-			dout_unsigned(out, din_unsigned(df, 4), 4);
+		case DVI_XXX4:	/* long extension to .DVI primitives */
+			ext = din_extension(df, NULL, c);
+			dout_extension(out, ext);
+			df_trace(df, "%d: xxx '%s'\n", pos, ext->buf);
 			break;
 		case DVI_FNT_DEF1: /* define the meaning of a font number */
 			parse_fntdef(df, out, 1);

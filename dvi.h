@@ -31,4 +31,14 @@ extern void dout_signed (DviFile *df, int val, unsigned len);
 extern void dout_unsigned (DviFile *df, int val, unsigned len);
 extern void dout_string (DviFile *df, char *buf, unsigned len);
 
+typedef struct {
+	int type;
+	unsigned len;
+	unsigned size;
+	char *buf;
+} DviExtension;
+
+extern DviExtension *din_extension (DviFile *df, DviExtension *buf, int type);
+extern void dout_extension (DviFile *df, DviExtension *buf);
+
 #endif	/* dvi.h */
