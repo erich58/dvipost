@@ -33,36 +33,36 @@ extern void df_trace (DviFile *df, const char *fmt, ...);
 extern int din_byte (DviFile *df);
 extern int din_signed (DviFile *df, unsigned len);
 extern unsigned din_unsigned (DviFile *df, unsigned len);
-extern char *din_string (DviFile *df, char *buf, unsigned len);
+extern char *din_string (DviFile *df, unsigned len);
 
 extern void dout_byte (DviFile *df, int val);
 extern void dout_signed (DviFile *df, int val, unsigned len);
 extern void dout_unsigned (DviFile *df, unsigned val, unsigned len);
 extern void dout_string (DviFile *df, char *buf, unsigned len);
 
-typedef struct {
-	int type;	/* command type */
-	unsigned len;	/* extension length */
-	unsigned size;	/* size of charakter buffer, must be 0 on start */
-	char *buf;	/* character buffer */
-} DviExtension;
-
-extern DviExtension *din_extension (DviFile *df, DviExtension *ext, int type);
-extern void dout_extension (DviFile *df, DviExtension *ext);
+/*	dvi - tokens
+*/
 
 typedef struct {
-	int type;	/* command type */
-	int font;	/* font number */
-	unsigned csum;	/* check sum in TFM file for font */
-	int scale;	/* scale fsctor */
-	int dsize;	/* design size */
-	int dlen;	/* directory length */
-	int nlen;	/* name length */
-	char *name;	/* font name */
-} DviFontDef;
+	int type;	/* token type */
+	int par[10];	/* int parameters */
+	char *str;	/* string parameter */
+} DviToken;
 
-extern DviFontDef *din_fontdef (DviFile *df, int type);
-extern void dout_fontdef (DviFile *df, DviFontDef *fdef);
-extern void dout_fonttab (DviFile *df);
+DviToken *din_token (DviFile *df);
+void dout_token (DviFile *df, DviToken *token);
+
+/*	font table
+*/
+
+typedef struct {
+	DviToken token;	/* font def token */
+} DviFont;
+
+extern DviFont *DviFontTab;
+extern int DviFontDim;
+
+extern DviFont *DviFont_get (int font);
+extern void DviFont_add (DviToken *token);
 
 #endif	/* dvi.h */
