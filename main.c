@@ -95,10 +95,10 @@ static ODEF pptex_odef[] = {
 	{ "progname", NULL, pptex_arg },
 	{ "shell-escape", NULL, pptex_noarg },
 	{ "translate-file", NULL, pptex_arg },
-	{ "help", "display this help and exit", pptex_help },
+	{ "help", NULL, pptex_help },
 	{ "version", NULL, pptex_version },
 #else
-	{ "help", NULL, pptex_help },
+	{ "help", "display this help and exit", pptex_help },
 	{ "version", "output version information and exit", dvipost_version },
 #endif
 	{ "debug", "increase dvipost debug level", dvipost_debug },
