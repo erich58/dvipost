@@ -1,3 +1,8 @@
+Version 1.0
+
+Added manpage to distribution.
+Fixed incorrect installation of commands.
+
 Version 0.9:
 
 Added autoconf script to create Makefile.

@@ -126,6 +126,21 @@ clean:: purge
 
 ### local stuff ###
 
+ps:: dvipost.ps
+purge::; rm -f dvipost.ps
+	
+dvipost.ps: dvipost.tex
+	tex2ps -n1 dvipost.tex $@
+
+man:: dvipost.1 dvipost.tex
+purge::; rm -f dvipost.1 dvipost.tex
+
+dvipost.1: dvipost.doc
+	LANG=en efeudoc -Tman -o $@ dvipost.doc
+
+dvipost.tex: dvipost.doc
+	LANG=en efeudoc -l -o $@ dvipost.doc
+
 # rules for ctags file
 
 SRC=	main.c $(HDR) $(BASE) $(DVIHDR) $(DVI)
@@ -139,12 +154,15 @@ clean::; rm -f tags
 
 # rules to create archiv
 
-export:: dvipost-0.9.tar.gz
+export:: dvipost-1.0.tar.gz
 
-dvipost-0.9.tar.gz:
-	cvs export -r V0_9 -d $(@:.tar.gz=) ltxpost
-	sed -e '/local stuff/,$$d' $(@:.tar.gz=)/Makefile.in > .tmp
-	mv .tmp $(@:.tar.gz=)/Makefile.in
+dvipost-1.0.tar.gz:
+	cvs export -r HEAD -d $(@:.tar.gz=) ltxpost
+	(cd $(@:.tar.gz=); \
+		sed -e '/local stuff/,$$d' Makefile.in > .tmp; \
+		mv .tmp Makefile.in; \
+		LANG=en efeudoc -Tman -o dvipost.man dvipost.doc; \
+		rm dvipost.dvi)
 	tar cvzf $@ $(@:.tar.gz=)
 	rm -rf $(@:.tar.gz=)
 

@@ -1,0 +1,237 @@
+/*	dvipost manpage
+
+$Copyright (C) 2002 Erich Frühstück
+
+Dvipost is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public
+License as published by the Free Software Foundation; either
+version 2 of the License, or (at your option) any later version.
+
+Dvipost is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public
+License along with dvipost; see the file COPYING.
+If not, write to the Free Software Foundation, Inc.,
+59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+*/
+
+\mpage[1] dvipost
+\Name
+dvipost, pptex, pplatex - post processing of DVI-Files
+
+\Synopsis
+|dvipost| [|-debug|] [|-version|] [|-help|] <in> <out>
+
+|pplatex| [|-debug|] [|-version|] [|-help|] [LaTeX-Arguments]
+
+|pptex| [|-debug|] [|-version|] [|-help|] [TeX-Arguments]
+
+\Description
+The command |dvipost| is a post procesor for dvi files, created by
+|latex| or |tex|. It is used for special modes, which normaly needs
+the support of dvi drivers (such as |dvips|). With |dvipost|, this
+features could be implemented independend of the prefered driver.
+Currently, the post processor supports layout raster, change bars and
+overstrike mode.
+
+This version of |dvipost| does not seek the dvi file, so it could be
+used as a filter. If |-| is given as file name, the command uses
+standard input or standard output respective. The command does not
+substitute a missing |.dvi| extension to the filename.
+
+Because the command works with a temporary file and
+creates the ouput file only after successfull processing the input file,
+it is possible to use the same name for input and output.
+
+If the command is renamed or linked to |pplatex|/|pptex|, it
+runs |latex|/|tex| and post processes the createt output.
+If the name of the dvi file could not be determined by the arguments
+to |latex|/|tex| (e.g. on an interactive run),
+the command processes all dvi files in the current directory with
+a modification time later than the run of |latex|/|tex|.
+
+\shead	Basics
+If the filter is used in context of \LaTeX;, the style file
+|dvipost.sty| should be included in the \LaTeX; source.
+
+The filter interpretes dvi extensions in the form of
+	|dvipost:| <name> [<arg>]
+where <arg> depends on the command <name> and may be separated from
+<name> by |=|  or space.
+All other extensions are not interpreted by |dvipost| and
+remains in the dvi file.
+
+Such a dvipost command could be placed with the \TeX; primitive
+	|\special{dvipost:| <cmd>|}|
+or the \LaTeX; macro (provided by |dvipost.sty|)
+	|\dvipost{|<cmd>|}|
+in the dvi file.
+
+Depending on the type of |dvipost| commands,
+the following kinds of arguments may be used:
+\ititem	length
+	is a floating point number followed by a
+	unit specification.
+	The folowing units are supportet by |divipost|:
+	|pt|, |in|, |cm| and |mm|.
+	If no argument is given or the unit specification is missing,
+	the corresponding <length> is set to 0.
+\ititem	string
+	is an arbitrary string argument.
+\ititem	flag
+	is an integer argument, where a value
+	different from 0 (usually 1) means true and a missing value or 0
+	means false.
+\ititem	depth
+	is an integer argument, where a value
+	different from 0 (usually 1) increments a depth counter
+	and a missing value or 0 decrements it.
+
+\shead	Change bars
+
+All text printed with change mode level higher than 0 is
+marked with a change bar.
+
+The following \LaTeX; macros modifies the change mode level:
+
+\ttitem	|\changestart|
+	increments the change mode level.
+\ttitem	|\changeend|
+	decrements the change mode level.
+\ttitem	|\textchanged|{<text>}
+	increments the change mode level for <text> only.
+
+The following |dvipost| commands are used in context of change bars:
+\ttitem cbmode <depth>
+	increments/decrements the change mode level.
+	This command is used by the \LaTeX; macros.
+\ttitem cbrule <length>
+	determines the thickness of the change bar. The default value
+	is 2pt.
+\ttitem cbsep <length>
+	sets the distance beetween page margin and change bar.
+	The default value is 2pt.
+\ttitem cbexp <length>
+	sets the additional height and depth of a character in
+	calculating the change bar positions.
+	The default value is 6pt.
+\ttitem cbstart <string>
+	places the dvi extension <string> before printing
+	characters in change mode.
+\ttitem cbend <string>
+	places the dvi extension <string> after printing
+	characters in change mode.
+
+The use of |cbstart| and |cbend| allows to set additional attributes
+to the marked text, depending on the dvi driver.
+
+If |dvips| is used as dvi driver and the preamble of the \LaTeX;
+source contains
+	|\usepackage[dvips,usenames]{color}|\br
+	|\usepackage{dvipost}|\br
+	|\dvipost{cbstart color push Blue}|\br
+	|\dvipost{cbend color pop}|
+the marked text is colored blue.
+
+\shead	Overstrike mode
+
+All text printed with overstrike level higher than 0 is
+overstriked with a horizontal line.
+
+The overstrike line is positioned at the mean height
+of every block of text not broken by vertical movements and font
+changes.
+
+The following \LaTeX; macros modifies the overstrike level:
+
+\ttitem	|\overstrikeon|
+	increments the ovwerstrike level.
+\ttitem	|\overstrikeoff|
+	decrements the overstrike level.
+\ttitem	|\overstrike|{<text>}
+	increments the overstrike level for <text> only.
+
+The following |dvipost| commands are used in context of overstrike mode:
+\ttitem osmode <depth>
+	increments/Decrements the overstrike level.
+	This command is used by the \LaTeX; macros.
+\ttitem osrule <length>
+	sets the thickness of the overstrike line to <length>.
+	The default value is |\fboxrule|.
+\ttitem osstart <string>
+	places the dvi extension <string> before change
+	of overstrile mode.
+\ttitem osend <string>
+	places the dvi extension <string> after change
+	of overstrile mode.
+
+The use of |osstart| and |osend| is similar to |cbstart| and |cbend|.
+
+\shead	Layout parameters
+
+Layout parameters are transfered to the dvi file on loading the
+style file. If any changes are made to layout parameters, like
+|\evensidemargin|, the macro |\dvipostlayout| must be called
+to get the correct placement of change bars. Additional calls
+to |\dvipostlayout| are harmeless.
+
+\latex{\begin{sloppypar}}
+The following layout parameters are transfered to the dvi file:
+|\hoffset|,
+|\voffset|,
+|\textwidth|,
+|\textheight|,
+|\oddsidemargin|,
+|\evensidemargin|,
+|\topmargin|,
+|\headheight|,
+|\headsep|,
+|\footskip|,
+|\marginparsep| and
+|\marginparwidth|.
+Additional the flag |twoside| is set to 0 or 1, depending on
+the document style option |twoside|.
+\latex{\end{sloppypar}}
+
+Instead of calling |\dvipostlayout|, partiucular values could be set.
+The command
+	|\dvipost{evensidemargin=\the\evensidemargin}|
+transfers the actual setting of |\evensidemargin| to the
+dvi file.
+
+The |dvipost| command allows the printing of the layout raster
+by setting |layout| to a length different to 0. The value of
+|layout| is used as the thickness of the raster lines.
+
+For example: The command
+	|\dvipost{layout=\the\fboxrule}|
+activates the layout raster and uses the same line thicknes as frame boxes.
+
+/*
+top
+footnote
+bottom
+float <depth>
+*/
+
+\Notes
+The filter is primarly written for \LaTeX;.
+It could be used for plain \TeX;, but currently there is no
+assistance style file includedi in the distribution.
+Maybe somone would write one, I am not a plain \TeX; user.
+
+The current state of change bar mode and overstrike mode
+must be committed do environments, which are placed on different
+locations than the current text. This is done in |dvipost.sty|
+by redefining |\color@begingroup| and |\color@endgroup|.
+This may conflict with other packages.
+
+If the macro |\footnoterule| is redefinied, it should start with
+the command |\dvipost{footnote}| for a correct handling of
+overstrike mode and change bars.
+
+\Copyright
+Copyright \latex[(C)]{\copyright{}} 2002 Erich Frühstück

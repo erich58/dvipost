@@ -1,6 +1,8 @@
 Makefile
 ltxpost
 dvipost
+dvipost.1
+dvipost.tex
 pplatex
 pptex
 config.log
