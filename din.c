@@ -1,7 +1,7 @@
 /*	reading tools for dvi-files
 */
 
-#include "ltxpost.h"
+#include "dvipost.h"
 #include "dvi.h"
 #include <stdarg.h>
 

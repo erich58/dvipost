@@ -7,7 +7,7 @@ all:: $(NAME) $(ALIAS) tags test
 
 #	basic functions
 
-HDR=	ltxpost.h
+HDR=	dvipost.h
 BASE=	message.c alloc.c pos.c
 
 $(BASE:.c=.o): $(HDR)

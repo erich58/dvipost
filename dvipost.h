@@ -3,8 +3,8 @@
 	A-3423 St.Andrä/Wördern, Südtirolergasse 17-21/5
 */
 
-#ifndef	ltxpost_h
-#define	ltxpost_h	1
+#ifndef	dvipost_h
+#define	dvipost_h	1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,4 +39,4 @@ void pos_add (PosTab *pos, int beg, int end);
 extern int process_dvi (const char *id, FILE *in, FILE *out);
 extern int dvipost (const char *iname, const char *oname);
 
-#endif	/* ltxpost.h */
+#endif	/* dvipost.h */

@@ -20,7 +20,7 @@ If not, write to the Free Software Foundation, Inc.,
 */
 
 
-#include "ltxpost.h"
+#include "dvipost.h"
 #include "dvi.h"
 #include <unistd.h>
 

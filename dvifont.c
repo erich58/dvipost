@@ -3,7 +3,7 @@
 	A-3423 St.Andrä/Wördern, Südtirolergasse 17-21/5
 */
 
-#include "ltxpost.h"
+#include "dvipost.h"
 #include "dvi.h"
 
 #define	BSIZE	8

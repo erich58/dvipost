@@ -21,7 +21,7 @@ If not, write to the Free Software Foundation, Inc.,
 static char *version = "dvipost version 0.8\n\
 Dvipost is copyright (C) 2002 Erich Fruehstueck.\n";
 
-#include "ltxpost.h"
+#include "dvipost.h"
 #include "dvi.h"
 #include <unistd.h>
 #include <string.h>
