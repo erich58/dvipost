@@ -116,9 +116,6 @@ clean:: purge
 
 ### local stuff ###
 
-configure: configure.in
-	autoconf
-
 Makefile: configure Makefile.in
 	configure
 
