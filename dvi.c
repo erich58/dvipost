@@ -11,7 +11,7 @@
 
 #define	RESOLUTION	300.
 
-static char *magic = "ltxpost";
+static char *magic = "dvipost";
 
 DviStat dvi_stat = { NULL, 0, 0, 0, 0, 0, 0 };
 DviUnit dvi_unit = { 0 };
@@ -77,11 +77,6 @@ static void dbg_printf (const char *fmt, ...)
 	}
 }
 
-static void dbg_beg (DviFile *df)
-{
-	dbg_pos = (verboselevel >= STAT) ? df->pos : 0;
-}
-
 static void dbg_end (void)
 {
 	if	(dbg_pos)
@@ -90,6 +85,14 @@ static void dbg_end (void)
 		dbg_pos = 0;
 	}
 }
+
+static void dbg_beg (DviFile *df)
+{
+	if	(dbg_pos)
+		putc('\n', stderr);
+	dbg_pos = (verboselevel >= STAT) ? df->pos : 0;
+}
+
 
 static char *tab1[] = {
 	"set1 ", "set2 ", "set3 ", "set4 ", "setrule ",
@@ -153,44 +156,68 @@ dbg_printf("current font is %s ", font ? font->token.str : "<undef>");
 
 typedef struct {
 	char *name;
-	void (*eval) (const char *arg);
+	void *par;
+	void (*eval) (void *par, const char *arg);
 } PostCmd;
 
-static int cbrule = 65536.;	/* 1pt */
+static int cbrule = 0;
+static int offset = 0;
 static int cbmode = 0;
-static int width = 0;
-static int height = 0;
+static int textwidth = 0;
+static int textheight = 0;
+static int evensidemargin = 0;
+static int oddsidemargin = 0;
+static int topmargin = 0;
+static int headheight = 0;
+static int headsep = 0;
+static int footskip = 0;
+static int showlayout = 0;
+static char *pre = NULL;
+static char *post = NULL;
 
-static int str2length (const char *arg)
+static void set_length (void *par, const char *arg)
 {
-	return pt_to_dvi * strtod(arg, NULL);
+	int *length = par;
+	*length = pt_to_dvi * strtod(arg, NULL);
 }
 
-static void cmd_cbmode (const char *arg)
+static void set_string (void *par, const char *arg)
 {
-	cbmode = atoi(arg);
+	char **ptr = par;
+	xfree(*ptr);
+	*ptr = xcopy(arg);
 }
 
-static void cmd_cbrule (const char *arg)
+static void set_flag (void *par, const char *arg)
 {
-	cbrule = str2length(arg);
+	int *flag = par;
+
+	*flag =	atoi(arg);
 }
 
-static void cmd_width (const char *arg)
+static void set_depth (void *par, const char *arg)
 {
-	width = str2length(arg);
-}
+	int *depth = par;
 
-static void cmd_height (const char *arg)
-{
-	height = str2length(arg);
+	if	(atoi(arg))	(*depth)++;
+	else if	(*depth)	(*depth)--;
 }
 
 static PostCmd cmd_tab[] = {
-	{ "width", cmd_width },
-	{ "height", cmd_height },
-	{ "cbrule", cmd_cbrule },
-	{ "cbmode", cmd_cbmode },
+	{ "textwidth", &textwidth, set_length },
+	{ "textheight", &textheight, set_length },
+	{ "oddsidemargin", &oddsidemargin, set_length },
+	{ "evensidemargin", &evensidemargin, set_length },
+	{ "topmargin", &topmargin, set_length },
+	{ "headheight", &headheight, set_length },
+	{ "headsep", &headsep, set_length },
+	{ "footskip", &footskip, set_length },
+	{ "showlayout", &showlayout, set_flag },
+	{ "cbrule", &cbrule, set_length },
+	{ "offset", &offset, set_length },
+	{ "cbmode", &cbmode, set_depth },
+	{ "pre", &pre, set_string },
+	{ "post", &post, set_string },
 };
 
 #define	cmd_dim	(sizeof(cmd_tab) / sizeof(cmd_tab[0]))
@@ -240,13 +267,68 @@ static int postcmd (char *cmd)
 	{
 		if	((arg = checkname(cmd_tab[i].name, cmd)))
 		{
-			cmd_tab[i].eval(arg);
+			cmd_tab[i].eval(cmd_tab[i].par, arg);
 			return 1;
 		}
 	}
 
 	message(NOTE, "$!: unknown command <%s>\n", cmd);
 	return 1;
+}
+
+DviToken tok_buf;
+
+static void dout_goto (DviFile *out, int v, int h)
+{
+	dout_down(out, v - dvi_stat.v);
+	dvi_stat.v = v;
+	dout_right(out, h - dvi_stat.h);
+	dvi_stat.h = h;
+}
+
+static void dout_move (DviFile *out, int v, int h)
+{
+	dout_down(out, v);
+	dvi_stat.v += v;
+	dout_right(out, h);
+	dvi_stat.h += h;
+}
+
+static void endpage (DviFile *out)
+{
+	if	(showlayout)
+	{
+		int footheight;
+
+		dout_special(out, pre);
+		dout_goto(out, topmargin, oddsidemargin);
+		dout_putrule(out, cbrule, textwidth);
+		dout_move(out, headheight, 0);
+		dout_putrule(out, headheight, cbrule);
+		dout_setrule(out, cbrule, textwidth);
+		dout_putrule(out, headheight, cbrule);
+
+		dout_move(out, headsep, -textwidth);
+		dout_putrule(out, cbrule, textwidth);
+		dout_move(out, textheight, 0);
+		dout_putrule(out, textheight, cbrule);
+		dout_setrule(out, cbrule, textwidth);
+		dout_putrule(out, textheight, cbrule);
+
+		footheight = headheight;
+
+		if	(footheight > footskip)
+			footheight = footskip;
+
+		dout_move(out, footskip - footheight, -textwidth);
+		dout_putrule(out, cbrule, textwidth);
+		dout_move(out, footheight, 0);
+		dout_putrule(out, footheight, cbrule);
+		dout_setrule(out, cbrule, textwidth);
+		dout_putrule(out, footheight, cbrule);
+
+		dout_special(out, post);
+	}
 }
 
 /*	functions
@@ -257,6 +339,21 @@ static void mv_right(int val)
 	dbg(("h:=%d%+d", dvi_stat.h, val));
 	dvi_stat.h += val;
 	dbg(("=%d ", dvi_stat.h));
+}
+
+static void setchar (DviFile *out, int c)
+{
+	int width = dvi_font->width[c];
+	mv_right(width);
+
+	if	(cbmode)
+	{
+		dout_special(out, pre);
+		dout_move(out, -offset, -width);
+		dout_setrule(out, cbrule, width);
+		dout_move(out, offset, 0);
+		dout_special(out, post);
+	}
 }
 
 /*	main routine
@@ -286,8 +383,9 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 		case DVI_SET2:
 		case DVI_SET3:
 		case DVI_SET4:
-			mv_right(dvi_font->width[token->par[0] & 0xff]);
-			break;
+			dout_token(out, token);
+			setchar(out, token->par[0] &0xff);
+			continue;
 		case DVI_SET_RULE:
 			dbg(("height %d, width %d \n ",
 				token->par[0], token->par[1]));
@@ -341,6 +439,7 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 			dvi_font = NULL;
 			break;
 		case DVI_EOP:
+			endpage(out);
 			break;
 		case DVI_PUSH:
 			dbg_level(level);
@@ -380,7 +479,9 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 		default:
 			if	(token->type <= DVI_SETC_127)
 			{
-				mv_right(dvi_font->width[token->type]);
+				dout_token(out, token);
+				setchar(out, token->par[0] &0xff);
+				continue;
 			}
 			else if	(token->type < DVI_FONT_00)
 			{

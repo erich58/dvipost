@@ -1,18 +1,67 @@
-\documentclass[12pt]{article}
+\documentclass[12pt,a4paper]{article}
 \usepackage[dvips,usenames]{color}
 
-\special{ltxpost: cbrule=10pt}
+\parskip\baselineskip
 
-\def\getlayout{%
-	\expandafter\special{ltxpost: width=\the\textwidth}%
-	\expandafter\special{ltxpost: height=\the\textheight}%
+% parameters
+
+\special{dvipost: showlayout=1}
+\special{dvipost: cbrule=\the\fboxrule}
+\special{dvipost: offset=2pt}
+\special{dvipost: pre color push Blue}
+\special{dvipost: post color pop}
+
+% interface macros
+
+\def\setlayout{%
+	\special{dvipost: textwidth=\the\textwidth}%
+	\special{dvipost: textheight=\the\textheight}%
+	\special{dvipost: evensidemargin=\the\evensidemargin}%
+	\special{dvipost: oddsidemargin=\the\oddsidemargin}%
+	\special{dvipost: topmargin=\the\topmargin}%
+	\special{dvipost: headheight=\the\headheight}%
+	\special{dvipost: headsep=\the\headsep}%
+	\special{dvipost: footskip=\the\footskip}%
 	\ignorespaces
 }
 
-\def\cs{\color{Red}\special{ltxpost: cbmode=1}}
-\def\ce{\special{ltxpost: cbmode=0}\color{Black}}
+\def\cs{\color{Red}\special{dvipost: cbmode=1}}
+\def\ce{\special{dvipost: cbmode=0}\color{Black}}
+\def\textchanged#1{\cs{}#1\ce{}}
+
+%	document
+
+\setlayout
 
 \begin{document}
-\getlayout
-{\Large\tt This} is a simple \cs{}test\ce{} document\rule{1pt}{1pt}
+Output marked as `changed text' is colored red. Generated output
+from {\tt ltxpost} is colored green.
+
+Here comes the first paragraph.
+\textchanged{This text is marked.}
+This text is not marked.
+
+Here is the second paragraph with some special markings.
+Here is a total marked formaular: \cs{}$\sum_{i=0}^{\infty}x_i$\ce{}.
+This text is not marked.
+Here is a partial marked formular:
+$\sum_{\cs{}i\ce{}j=0}^{\infty}x_{\cs{}i\ce{}j}$.
+This text is not marked.
+Currently there are problens with some special characters.
+
+\noindent
+\begin{minipage}[b]{0.4\textwidth}
+Here starts a minipage.
+This text is not marked.
+\textchanged{This text is marked.}
+This text is not marked.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.4\textwidth}
+Here starts a minipage.
+This text is not marked.
+\textchanged{This text is marked.}
+This text is not marked.
+\end{minipage}
+
 \end{document}
