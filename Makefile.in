@@ -127,7 +127,7 @@ test:: test.dvi test.ps
 
 test.ps test.dvi test.post: $(NAME) test.tex dvipost.sty
 	latex test
-	$(NAME) -debug test.dvi test.dvi 2> test.post
+	./$(NAME) -debug test.dvi test.dvi 2> test.post
 	dvips -o test.ps test.dvi
 
 purge::; rm -f test.ps test.dvi test.post
