@@ -805,6 +805,13 @@ int process_dvi (const char *id, FILE *ifile, FILE *ofile)
 		case DVI_FNT_DEF4:
 			dbg(("%d: %s ", token->par[0], token->str));
 			break;
+		case DVI_FNT1:
+		case DVI_FNT2:
+		case DVI_FNT3:
+		case DVI_FNT4:
+			dvi_font = DviFont_get(token->par[0]);
+			dbg_font(dvi_font);
+			break;
 		case DVI_PRE:
 			set_unit(token);
 			break;
