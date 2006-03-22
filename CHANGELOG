@@ -1,6 +1,9 @@
-Version 1,1
+Version 1.1
 
-Corrected test run.
+Bugfix: Added support for DVI_FNT commands. The lacke of this
+caused dvipost to segfault on documents with more than 64 fonts.
+Removed unneeded package color from examples.
+Corrected command calls in Makefile.in
 
 Version 1.0
 
