@@ -130,7 +130,6 @@ to the marked text, depending on the dvi driver.
 
 If |dvips| is used as dvi driver and the preamble of the \LaTeX;
 source contains
-	|\usepackage[dvips,usenames]{color}|\br
 	|\usepackage{dvipost}|\br
 	|\dvipost{cbstart color push Blue}|\br
 	|\dvipost{cbend color pop}|
