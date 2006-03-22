@@ -119,7 +119,7 @@ distclean:: clean
 # rebuild rules
 
 Makefile: configure Makefile.in
-	configure
+	./configure
 
 #	run test
 
