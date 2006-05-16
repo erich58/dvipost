@@ -24,7 +24,7 @@ If not, write to the Free Software Foundation, Inc.,
 #define	TEX_ACCEPT_OPTIONS	1
 #endif
 
-static char *version = "dvipost version 1.0\n\
+static char *version = "dvipost version 1.1\n\
 Dvipost is copyright (C) 2002 Erich Fruehstueck.\n";
 
 #include "dvipost.h"
