@@ -1,3 +1,7 @@
+Version 1.1-1
+
+Fixed wrong output of version number.
+
 Version 1.1
 
 Bugfix: Added support for DVI_FNT commands. The lacke of this
